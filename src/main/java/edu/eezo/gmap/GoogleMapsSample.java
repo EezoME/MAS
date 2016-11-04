@@ -1,5 +1,10 @@
 package edu.eezo.gmap;
 
+import com.google.maps.DirectionsApi;
+import com.google.maps.DirectionsApiRequest;
+import com.google.maps.GeoApiContext;
+import com.google.maps.GeocodingApi;
+import com.google.maps.model.GeocodingResult;
 import com.teamdev.jxbrowser.chromium.Browser;
 import com.teamdev.jxbrowser.chromium.swing.BrowserView;
 
@@ -7,6 +12,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
 
 /**
  * Created by Eezo on 25.10.2016.
@@ -15,6 +21,7 @@ public class GoogleMapsSample {
 
     public static final int MIN_ZOOM = 0;
     public static final int MAX_ZOOM = 21;
+    private static final String API_KEY = "AIzaSyDT2f3cnK8thzC6Vn9sGXexTtslo_gFlCo";
 
     /**
      * In map.html file default zoom value is set to 4.
@@ -77,7 +84,11 @@ public class GoogleMapsSample {
 
         browser.loadURL("D:\\MAS\\src\\main\\resources\\html\\map.html");*/
 
-        Browser browser = new Browser();
+
+
+
+
+        /*Browser browser = new Browser();
         JPanel panel = new JPanel();
 
         JTabbedPane tabbedPane = new JTabbedPane();
@@ -92,6 +103,27 @@ public class GoogleMapsSample {
         frame.setVisible(true);
 
         browser.loadURL("D:\\MAS\\src\\main\\resources\\html\\map.html");
-        //browser.loadURL("https://www.google.com.ua");
+        //browser.loadURL("https://www.google.com.ua");*/
+
+
+
+
+        try {
+            GeoApiContext context = new GeoApiContext().setApiKey(API_KEY);
+            GeocodingResult[] results = GeocodingApi.geocode(context,
+                    "1600 Amphitheatre Parkway Mountain View, CA 94043").await();
+            System.out.println(results[0].formattedAddress);
+
+            String origin = "Николаев";
+            String destination = "Одесса";
+            DirectionsApiRequest dar = DirectionsApi.newRequest(context);
+            dar.origin(origin);
+            dar.destination(destination);
+            dar.alternatives(false);
+            System.out.println(dar.await().routes[0].legs[0].distance.inMeters);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
