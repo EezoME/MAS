@@ -37,6 +37,10 @@ public class Place {
         return gmapsAddress;
     }
 
+    /**
+     * Generates a list of most known Ukrainian cities (31 places).
+     * @return a list of locations
+     */
     public static List<Place> generateDefaultPlaces() {
         List<Place> places = new ArrayList<>();
         places.add(new Place("Белая Церковь", "Киевская область, Украина"));
@@ -82,10 +86,21 @@ public class Place {
         return null;
     }
 
+    /**
+     * Returns a random place form specified list.
+     * @param placeList specified list
+     * @return place object
+     */
     public static Place getRandomPlaceFromList(List<Place> placeList) {
         return placeList.get(MainGUI.getRandomNumberInRange(0, placeList.size()));
     }
 
+    /**
+     * Returns a random place that not equal to specified form the list.
+     * @param placeList the list
+     * @param exclude specified place
+     * @return place object
+     */
     public static Place getRandomPlaceFromListExclude(List<Place> placeList, Place exclude) {
         Place place;
         do {

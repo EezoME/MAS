@@ -5,8 +5,7 @@ import edu.eezo.data.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -35,10 +34,26 @@ public class MainGUI extends JFrame {
     private JButton buttonNextStep;
 
     public static Locale locale = Locale.ENGLISH;
+    /**
+     * A list of locations (by default, Ukrainian cities).
+     */
     public static java.util.List<Place> placeList = Place.generateDefaultPlaces();
+    /**
+     * A list of customers.
+     */
     public static java.util.List<Customer> customerList = Customer.generateDefaultCustomers();
+    /**
+     * Order lists.
+     */
     public static java.util.List<OrderList> orderLists = null;
+    /**
+     * Current headquarter location (for saving algorithm).
+     * By default sets to "Николаев".
+     */
     public static Place myHeadquarter = Place.getPlaceByTitle(placeList, "Николаев");
+    /**
+     * A list of company vehicles (trucks).
+     */
     public static java.util.List<Vehicle> vehicleList = Vehicle.generateDefaultVehiclesList();
 
     public MainGUI() {
@@ -54,8 +69,9 @@ public class MainGUI extends JFrame {
         makeFormInitialization();
 
         /* COMBOBOXES LISTENERS */
-        comboBoxOrdersLists.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+        comboBoxOrdersLists.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
                 if (!checkOrdersListComboBox()) {
                     return;
                 }
@@ -169,6 +185,14 @@ public class MainGUI extends JFrame {
         buttonNextStep.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (orderLists.isEmpty()){
+                    JOptionPane.showMessageDialog(null, "Order Lists is empty. Saving algorithm cannot be run.");
+                    return;
+                }
+                if (vehicleList.isEmpty()){
+                    JOptionPane.showMessageDialog(null, "Vehicles List is empty. Saving algorithm cannot be run.");
+                    return;
+                }
                 tabbedPane1.setSelectedIndex(1);
             }
         });
@@ -252,9 +276,12 @@ public class MainGUI extends JFrame {
     /* HELP METHOD FOR COMBOBOXES */
 
     private void refreshOrderListsCombobox() {
-        comboBoxOrdersLists.removeAllItems();
+        int count = comboBoxOrdersLists.getItemCount();
         for (OrderList orderList : orderLists) {
             comboBoxOrdersLists.addItem(orderList);
+        }
+        for (int i = 0; i < count; i++) {
+            comboBoxOrdersLists.removeItemAt(0);
         }
     }
 

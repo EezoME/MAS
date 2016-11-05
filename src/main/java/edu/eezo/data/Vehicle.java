@@ -43,6 +43,10 @@ public class Vehicle {
         this.state = state;
     }
 
+    /**
+     * Generates 5 default vehicles with <code>maxWeight</code> = 25.000.
+     * @return a list of vehicles
+     */
     public static List<Vehicle> generateDefaultVehiclesList() {
         List<Vehicle> vehicles = new ArrayList<>();
         for (int i = 0; i < 5; i++) {

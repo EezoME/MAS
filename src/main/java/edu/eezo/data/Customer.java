@@ -18,6 +18,10 @@ public class Customer {
         this.headquartersLocation = headquartersLocation;
     }
 
+    /**
+     * Generates 5 default customers with headquarters in "Николаев".
+     * @return a list of customers
+     */
     public static List<Customer> generateDefaultCustomers() {
         List<Customer> customers = new ArrayList<>();
         for (int i = 0; i < 5; i++) {

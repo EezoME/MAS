@@ -90,7 +90,9 @@ public class OrderGUI extends JDialog {
         if (!checkRequiredFields()) {
             return;
         }
-        checkOptionalFields();
+        if (checkOptionalFields()) {
+            return;
+        }
         if (order == null) {
             order = new Order();
         }
@@ -107,22 +109,17 @@ public class OrderGUI extends JDialog {
         order.setCustomer((Customer) comboBoxCustomer.getSelectedItem());
         order.setOrigin((Place) comboBoxOrigin.getSelectedItem());
         order.setDestination((Place) comboBoxDestination.getSelectedItem());
-        try {
-            order.setWeight(Integer.parseInt(textFieldWeight.getText()));
-            order.setMaxPrice(Integer.parseInt(textFieldMaxPrice.getText()));
-            if (textFieldDeliveryDuration.getText().isEmpty()) {
-                order.setDeliveryDuration(order.getOrderReceiptTime().getTime() + Long.parseLong(textFieldDeliveryDuration.getText()) * (60 * 1000));
-            } else {
-                order.setDeliveryDuration(Long.parseLong(textFieldDeliveryDuration.getText()));
-            }
-            if (textFieldFine.getText().isEmpty()) {
-                order.setFine(Order.DEFAULT_FINE);
-            } else {
-                order.setFine(Integer.parseInt(textFieldFine.getText()));
-            }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(null, "Specified value is not a number.");
-            return;
+        order.setWeight(Integer.parseInt(textFieldWeight.getText()));
+        order.setMaxPrice(Integer.parseInt(textFieldMaxPrice.getText()));
+        if (textFieldDeliveryDuration.getText().isEmpty()) {
+            order.setDeliveryDuration(order.getOrderReceiptTime().getTime() + Long.parseLong(textFieldDeliveryDuration.getText()) * (60 * 1000));
+        } else {
+            order.setDeliveryDuration(Long.parseLong(textFieldDeliveryDuration.getText()));
+        }
+        if (textFieldFine.getText().isEmpty()) {
+            order.setFine(Order.DEFAULT_FINE);
+        } else {
+            order.setFine(Integer.parseInt(textFieldFine.getText()));
         }
 
         dispose();
@@ -144,19 +141,61 @@ public class OrderGUI extends JDialog {
             JOptionPane.showMessageDialog(null, "Specify the weight.");
             return false;
         }
+        try {
+            if (Integer.parseInt(textFieldWeight.getText()) <= 0) {
+                JOptionPane.showMessageDialog(null, "Weight value must be grater than 0.");
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "Weight value is not a number!");
+            return false;
+        }
+
         if (textFieldMaxPrice.getText().isEmpty()) {
             JOptionPane.showMessageDialog(null, "Specify the price.");
             return false;
         }
+        try {
+            if (Integer.parseInt(textFieldMaxPrice.getText()) <= 0) {
+                JOptionPane.showMessageDialog(null, "Max price value must be grater than 0.");
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "Max price value is not a number!");
+            return false;
+        }
+
         return true;
     }
 
-    private void checkOptionalFields() {
+    private boolean checkOptionalFields() {
         if (textFieldDeliveryDuration.getText().isEmpty()) {
             System.out.println("INFO: You didn't specified delivery duration. It will be set to default (1 week).");
         }
         if (textFieldFine.getText().isEmpty()) {
             System.out.println("INFO: You didn't specified fine. It will be set to default (100 UAH/hour).");
         }
+
+        try {
+            if (Long.parseLong(textFieldDeliveryDuration.getText()) <= 0) {
+                JOptionPane.showMessageDialog(null, "Delivery duration value must be grater than 0.");
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "Delivery duration value is not a number!");
+            return false;
+        }
+
+        try {
+            if (Integer.parseInt(textFieldFine.getText()) < 0) {
+                JOptionPane.showMessageDialog(null, "Fine value must be positive.");
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "Fine value is not a number!");
+            return false;
+        }
+
+        return true;
     }
 }
