@@ -31,7 +31,7 @@ public class Order {
      */
     private int weight; // kilograms
     /**
-     * The maximum value that the customer can pay.<br/>
+     * The maximum value that the customer can pay for transportation (in UAH).<br/>
      * <i>ТЗ:</i> Максимальна вартість, яку може заплатити клієнт.
      */
     private int maxPrice;
@@ -55,10 +55,30 @@ public class Order {
         this.orderReceiptTime = new Date(System.currentTimeMillis());
     }
 
-    public Order(Customer customer, Place origin, Place destination, int weight, int maxPrice, long deliveryDuration) {
-        this(new Date(System.currentTimeMillis()), customer, origin, destination, weight, maxPrice, deliveryDuration, DEFAULT_FINE);
+    /**
+     * Creates an order (short way).
+     * @param customer orders customer
+     * @param origin order origin
+     * @param destination order destination
+     * @param weight cargo weight (in kilograms)
+     * @param priceForTon price per ton (in UAH)
+     * @param deliveryDuration maximal duration of transportation (in minutes)
+     */
+    public Order(Customer customer, Place origin, Place destination, int weight, int priceForTon, long deliveryDuration) {
+        this(new Date(System.currentTimeMillis()), customer, origin, destination, weight, (int) (priceForTon * weight / 1000.0), deliveryDuration, DEFAULT_FINE);
     }
 
+    /**
+     * Creates an order.
+     * @param orderReceiptTime the timing of the order
+     * @param customer orders customer
+     * @param origin order origin
+     * @param destination order destination
+     * @param weight cargo weight (in kilograms)
+     * @param maxPrice maximal price that customer can pay for transportation (in UAH)
+     * @param deliveryDuration maximal duration of transportation (in minutes)
+     * @param fine penalties for late execution of the order (in UAH)
+     */
     public Order(Date orderReceiptTime, Customer customer, Place origin, Place destination, int weight, int maxPrice,
                  long deliveryDuration, int fine) {
         this.orderReceiptTime = orderReceiptTime;
@@ -139,9 +159,10 @@ public class Order {
         Date current = new Date(System.currentTimeMillis());
         long deliveryDuration = 7 * 24 * 60; // 1 week by default
         Place origin = Place.getRandomPlaceFromList(MainGUI.placeList);
+        int weight = MainGUI.getRandomNumberInRange(1800, 8500);
         return new Order(current, MainGUI.customerList.get(MainGUI.getRandomNumberInRange(0, MainGUI.customerList.size())),
                 origin, Place.getRandomPlaceFromListExclude(MainGUI.placeList, origin),
-                MainGUI.getRandomNumberInRange(1800, 8500), MainGUI.getRandomNumberInRange(7000, 25000), deliveryDuration, DEFAULT_FINE);
+                weight, weight * 2, deliveryDuration, DEFAULT_FINE);
     }
 
     public static String[] getTableColumnsIdentifiers() {

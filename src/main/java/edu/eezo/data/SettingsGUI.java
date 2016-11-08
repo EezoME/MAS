@@ -22,6 +22,7 @@ public class SettingsGUI extends JDialog {
     private JComboBox comboBoxCustomerHeadquarterInput;
 
     public SettingsGUI() {
+        setTitle("General Settings -- MAS");
         setContentPane(contentPane);
         setModal(true);
         setResizable(false);

@@ -109,6 +109,15 @@ public class Place {
         return place;
     }
 
+    public static boolean isPlaceInList(List<Place> placeList, Place place){
+        for (Place p : placeList){
+            if (p.equals(place)){
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public String toString() {
         return title;

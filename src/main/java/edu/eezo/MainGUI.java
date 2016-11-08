@@ -1,6 +1,7 @@
 package edu.eezo;
 
 import edu.eezo.data.*;
+import edu.eezo.saving.SavingAlgorithm;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -32,6 +33,12 @@ public class MainGUI extends JFrame {
     private JTextField textFieldVehicleIdentificationInput;
     private JTextField textFieldVehicleWeightInput;
     private JButton buttonNextStep;
+    private JComboBox comboBoxOrdersLists2;
+    private JButton buttonRunAlgorithm;
+    private JTable tableSaving;
+    private JLabel labelGlobalRoute;
+    private JButton buttonBuildLocalRoutes;
+    private JLabel labelTakeAWhile;
 
     public static Locale locale = Locale.ENGLISH;
     /**
@@ -67,6 +74,11 @@ public class MainGUI extends JFrame {
         makeDataInitialization();
 
         makeFormInitialization();
+
+
+        /* LISTENERS OF TAB 1 */
+
+
 
         /* COMBOBOXES LISTENERS */
         comboBoxOrdersLists.addItemListener(new ItemListener() {
@@ -127,7 +139,7 @@ public class MainGUI extends JFrame {
                     return;
                 }
                 orderLists.add(new OrderList(title, null));
-                refreshOrderListsCombobox();
+                refreshOrderListsCombobox(comboBoxOrdersLists);
             }
         });
         buttonRemoveOrderList.addActionListener(new ActionListener() {
@@ -138,7 +150,7 @@ public class MainGUI extends JFrame {
                 }
                 if (JOptionPane.showConfirmDialog(null, "Are you sure you want remove an order list?") == JOptionPane.OK_OPTION) {
                     orderLists.remove(comboBoxOrdersLists.getSelectedIndex());
-                    refreshOrderListsCombobox();
+                    refreshOrderListsCombobox(comboBoxOrdersLists);
                 }
             }
         });
@@ -185,15 +197,28 @@ public class MainGUI extends JFrame {
         buttonNextStep.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (orderLists.isEmpty()){
-                    JOptionPane.showMessageDialog(null, "Order Lists is empty. Saving algorithm cannot be run.");
+                if (!preSavingChecks()){
                     return;
                 }
-                if (vehicleList.isEmpty()){
-                    JOptionPane.showMessageDialog(null, "Vehicles List is empty. Saving algorithm cannot be run.");
-                    return;
-                }
+                refreshOrderListsCombobox(comboBoxOrdersLists2);
                 tabbedPane1.setSelectedIndex(1);
+            }
+        });
+
+
+
+        /* LISTENERS OF TAB 2 */
+
+
+        buttonRunAlgorithm.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (!preSavingChecks()){
+                    return;
+                }
+                SavingAlgorithm savingAlgorithm = new SavingAlgorithm(orderLists.get(comboBoxOrdersLists2.getSelectedIndex()));
+                savingAlgorithm.runAlgorithm();
+                fillSavingTable(savingAlgorithm.getTableRowsData());
             }
         });
     }
@@ -213,12 +238,13 @@ public class MainGUI extends JFrame {
         orderLists = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             orderLists.add(OrderList.generateDefaultOrderList("Order list " + i));
+            //orderLists.add(OrderList.generateOrderListWithUniquePairs("Order list " + i, new int[]{2500,8600}, 2000));
         }
     }
 
     private void makeFormInitialization() {
         // ORDER LISTS INITIALIZATION
-        refreshOrderListsCombobox();
+        refreshOrderListsCombobox(comboBoxOrdersLists);
 
         // ORDERS TABLE INITIALIZATION
         DefaultTableModel model1 = (DefaultTableModel) tableOrdersList.getModel();
@@ -231,6 +257,11 @@ public class MainGUI extends JFrame {
         model2.setRowCount(0);
 
         fillVehicleTable(vehicleList);
+
+        // SAVING TABLE INITIALIZATION
+        DefaultTableModel model3 = (DefaultTableModel) tableSaving.getModel();
+        model3.setColumnIdentifiers(SavingAlgorithm.getTableColumnsIdentifiers());
+        model3.setRowCount(0);
     }
 
 
@@ -258,6 +289,14 @@ public class MainGUI extends JFrame {
         }
     }
 
+    private void fillSavingTable(Object[][] rows) {
+        removeRows(tableSaving);
+        DefaultTableModel model = (DefaultTableModel) tableSaving.getModel();
+        for (Object[] row : rows) {
+            model.addRow(row);
+        }
+    }
+
     private void removeRows(JTable table) {
         DefaultTableModel model = (DefaultTableModel) table.getModel();
         while (model.getRowCount() > 0) {
@@ -275,13 +314,13 @@ public class MainGUI extends JFrame {
 
     /* HELP METHOD FOR COMBOBOXES */
 
-    private void refreshOrderListsCombobox() {
-        int count = comboBoxOrdersLists.getItemCount();
+    private void refreshOrderListsCombobox(JComboBox comboBox) {
+        int count = comboBox.getItemCount();
         for (OrderList orderList : orderLists) {
-            comboBoxOrdersLists.addItem(orderList);
+            comboBox.addItem(orderList);
         }
         for (int i = 0; i < count; i++) {
-            comboBoxOrdersLists.removeItemAt(0);
+            comboBox.removeItemAt(0);
         }
     }
 
@@ -313,5 +352,17 @@ public class MainGUI extends JFrame {
     private void runOrderGUI(Order order) {
         OrderGUI.main(order);
         refreshOrdersTable();
+    }
+
+    private boolean preSavingChecks(){
+        if (orderLists.isEmpty()){
+            JOptionPane.showMessageDialog(null, "Order Lists is empty. Saving algorithm cannot be run.");
+            return false;
+        }
+        if (vehicleList.isEmpty()){
+            JOptionPane.showMessageDialog(null, "Vehicles List is empty. Saving algorithm cannot be run.");
+            return false;
+        }
+        return true;
     }
 }
