@@ -19,49 +19,57 @@ import java.util.List;
 public class MainGUI extends JFrame {
     private JPanel rootPanel;
     private JTabbedPane tabbedPane1;
-    private JComboBox comboBoxOrdersLists;
-    private JButton buttonAddNewOrderList;
-    private JTable tableOrdersList;
-    private JButton buttonAddOrder;
-    private JButton buttonDeleteOrder;
-    private JButton buttonEditOrder;
-    private JTable tableTrucksList;
-    private JButton buttonAddTruck;
-    private JButton buttonRemoveTruck;
-    private JButton buttonData;
-    private JButton buttonRemoveOrderList;
-    private JTextField textFieldVehicleIdentificationInput;
-    private JTextField textFieldVehicleWeightInput;
-    private JButton buttonNextStep;
+    private JTable tableClientOrdersList;
+    private JButton buttonAddClientOrder;
+    private JButton buttonDeleteClientOrder;
+    private JButton buttonEditClientOrder;
+    private JTable tableBasesOrderList;
+    private JButton buttonAddBaseOrder;
+    private JButton buttonEditBaseOrder;
+    private JButton buttonDeleteBaseOrder;
+    private JTable tableVehiclesList;
+    private JButton buttonAddVehicle;
+    private JButton buttonEditVehicle;
+    private JButton buttonRemoveVehicle;
     private JComboBox comboBoxOrdersLists2;
     private JButton buttonRunAlgorithm;
     private JTable tableSaving;
     private JLabel labelGlobalRoute;
     private JButton buttonBuildLocalRoutes;
     private JLabel labelTakeAWhile;
+    private JButton buttonData;
+    private JButton buttonNextStep;
 
+    /**
+     * For date parsing.
+     */
     public static Locale locale = Locale.ENGLISH;
     /**
      * A list of locations (by default, Ukrainian cities).
      */
-    public static java.util.List<Place> placeList = Place.generateDefaultPlaces();
+    public static java.util.List<Place> placeList;
     /**
-     * A list of customers.
+     * Distances between places (to avoid multiple requests to GMaps service on each start).
      */
-    public static java.util.List<Customer> customerList = Customer.generateDefaultCustomers();
+    public static long[][] distancesMatrix;
     /**
-     * Order lists.
+     * A list of clients.
      */
-    public static java.util.List<OrderList> orderLists = null;
+    public static java.util.List<Client> clientList;
+    /**
+     * Order lists (include clients and bases orders).
+     */
+    public static java.util.List<Order> orderList;
+    /**
+     * A list of company vehicles (trucks).
+     */
+    public static java.util.List<Vehicle> vehicleList;
     /**
      * Current headquarter location (for saving algorithm).
      * By default sets to "Николаев".
      */
-    public static Place myHeadquarter = Place.getPlaceByTitle(placeList, "Николаев");
-    /**
-     * A list of company vehicles (trucks).
-     */
-    public static java.util.List<Vehicle> vehicleList = Vehicle.generateDefaultVehiclesList();
+    public static Place myHeadquarter;
+
 
     public MainGUI() {
         super("MAS");
@@ -71,119 +79,118 @@ public class MainGUI extends JFrame {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setVisible(true);
 
-        makeDataInitialization();
-
-        makeFormInitialization();
-
-
-        /* LISTENERS OF TAB 1 */
+        dataInitialization();
+        formInitialization();
 
 
 
-        /* COMBOBOXES LISTENERS */
-        comboBoxOrdersLists.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                if (!checkOrdersListComboBox()) {
-                    return;
-                }
-                fillOrderTable(((OrderList) comboBoxOrdersLists.getSelectedItem()).getOrders());
-            }
-        });
+        /* -------- LISTENERS OF TAB 1 -------- */
 
-        /* ORDER LISTENERS */
-        buttonAddOrder.addActionListener(new ActionListener() {
+
+
+        /* CLIENT ORDER LISTENERS */
+        buttonAddClientOrder.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                orderLists.get(comboBoxOrdersLists.getSelectedIndex()).getOrders().add(Order.generateRandomOrder());
-                runOrderGUI(orderLists.get(comboBoxOrdersLists.getSelectedIndex()).getOrders().get(orderLists.get(comboBoxOrdersLists.getSelectedIndex()).getOrders().size() - 1));
+                orderList.add(Order.generateDefaultOrder(false));
+                runOrderGUI(orderList.get(orderList.size() - 1));
+                refreshOrdersTables();
             }
         });
-        buttonEditOrder.addActionListener(new ActionListener() {
+        buttonEditClientOrder.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (!checkOrdersListComboBox()) {
-                    return;
-                }
-                if (!checkTableSelection(tableOrdersList)) {
+                if (!checkTableSelection(tableClientOrdersList)) {
                     JOptionPane.showMessageDialog(null, "Select an order in the table");
                     return;
                 }
-                runOrderGUI(orderLists.get(comboBoxOrdersLists.getSelectedIndex()).getOrders().get(tableOrdersList.getSelectedRow()));
+                runOrderGUI(Order.getOrderById(orderList, (int) tableClientOrdersList.getValueAt(tableClientOrdersList.getSelectedRow(),
+                        0)));
+                refreshOrdersTables();
             }
         });
-        buttonDeleteOrder.addActionListener(new ActionListener() {
+        buttonDeleteClientOrder.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (!checkOrdersListComboBox()) {
-                    return;
-                }
-                if (!checkTableSelection(tableOrdersList)) {
+                if (!checkTableSelection(tableClientOrdersList)) {
                     JOptionPane.showMessageDialog(null, "Select an order in the table");
                     return;
                 }
-                if (JOptionPane.showConfirmDialog(null, "Are you sure you want to delete an order?") == JOptionPane.OK_OPTION) {
-                    orderLists.get(comboBoxOrdersLists.getSelectedIndex()).getOrders().remove(tableOrdersList.getSelectedRow());
+                if (JOptionPane.showConfirmDialog(null, "Are you sure you want to delete this order?") == JOptionPane.OK_OPTION) {
+                    orderList.remove(Order.getOrderById(orderList, (int) tableClientOrdersList.getValueAt(tableClientOrdersList.getSelectedRow(),
+                            0)));
                 }
-                refreshOrdersTable();
+                fillTableWithData(tableClientOrdersList, Order.getClientsOrderSublist(orderList));
             }
         });
 
-        /* ORDER LIST LISTENERS */
-        buttonAddNewOrderList.addActionListener(new ActionListener() {
+        /* BASE ORDER LISTENERS */
+        buttonAddBaseOrder.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String title = JOptionPane.showInputDialog(null, "Please, enter a new order list name");
-                if (title == null || title.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "You didn't type new order list name. Creation failed.");
-                    return;
-                }
-                orderLists.add(new OrderList(title, null));
-                refreshOrderListsCombobox(comboBoxOrdersLists);
+                orderList.add(Order.generateDefaultOrder(true));
+                runOrderGUI(orderList.get(orderList.size() - 1));
+                refreshOrdersTables();
             }
         });
-        buttonRemoveOrderList.addActionListener(new ActionListener() {
+        buttonEditBaseOrder.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (!checkOrdersListComboBox()) {
+                if (!checkTableSelection(tableBasesOrderList)) {
+                    JOptionPane.showMessageDialog(null, "Select an order in the table");
                     return;
                 }
-                if (JOptionPane.showConfirmDialog(null, "Are you sure you want remove an order list?") == JOptionPane.OK_OPTION) {
-                    orderLists.remove(comboBoxOrdersLists.getSelectedIndex());
-                    refreshOrderListsCombobox(comboBoxOrdersLists);
+                runOrderGUI(Order.getOrderById(orderList, (int) tableBasesOrderList.getValueAt(tableBasesOrderList.getSelectedRow(),
+                        0)));
+                refreshOrdersTables();
+            }
+        });
+        buttonDeleteBaseOrder.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (!checkTableSelection(tableBasesOrderList)) {
+                    JOptionPane.showMessageDialog(null, "Select an order in the table");
+                    return;
                 }
+                if (JOptionPane.showConfirmDialog(null, "Are you sure you want to delete this order?") == JOptionPane.OK_OPTION) {
+                    orderList.remove(Order.getOrderById(orderList, (int) tableBasesOrderList.getValueAt(tableBasesOrderList.getSelectedRow(),
+                            0)));
+                }
+                fillTableWithData(tableBasesOrderList, Order.getBaseOrderSublist(orderList));
             }
         });
 
         /* VEHICLE LISTENERS */
-        buttonAddTruck.addActionListener(new ActionListener() {
+        buttonAddVehicle.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (textFieldVehicleIdentificationInput.getText().isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "You didn't input truck identification data. Creation failed.");
-                    return;
-                }
-                if (textFieldVehicleWeightInput.getText().isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "You didn't input truck weight data. Creation failed.");
-                    return;
-                }
-                vehicleList.add(new Vehicle(textFieldVehicleIdentificationInput.getText(), myHeadquarter,
-                        Integer.parseInt(textFieldVehicleWeightInput.getText())));
-
-                fillVehicleTable(vehicleList);
+                vehicleList.add(Vehicle.generateDefaultVehicle());
+                runVehicleGUI(vehicleList.get(vehicleList.size() - 1));
+                fillTableWithData(tableVehiclesList, vehicleList);
             }
         });
-        buttonRemoveTruck.addActionListener(new ActionListener() {
+        buttonEditVehicle.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (!checkTableSelection(tableTrucksList)) {
-                    JOptionPane.showMessageDialog(null, "Select a vehicle in the table.");
+                if (!checkTableSelection(tableVehiclesList)) {
+                    JOptionPane.showMessageDialog(null, "Select a vehicle in the table");
                     return;
                 }
-                if (JOptionPane.showConfirmDialog(null, "Are you sure you want to delete a vehicle?") == JOptionPane.OK_OPTION) {
-                    vehicleList.remove(tableTrucksList.getSelectedRow());
+                runVehicleGUI(vehicleList.get(tableVehiclesList.getSelectedRow()));
+                fillTableWithData(tableVehiclesList, vehicleList);
+            }
+        });
+        buttonRemoveVehicle.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (!checkTableSelection(tableVehiclesList)) {
+                    JOptionPane.showMessageDialog(null, "Select a vehicle in the table");
+                    return;
                 }
-                fillVehicleTable(vehicleList);
+                if (JOptionPane.showConfirmDialog(null, "Are you sure you want to delete this order?") == JOptionPane.OK_OPTION) {
+                    vehicleList.remove(tableVehiclesList.getSelectedRow());
+                }
+                fillTableWithData(tableVehiclesList, vehicleList);
             }
         });
 
@@ -197,28 +204,27 @@ public class MainGUI extends JFrame {
         buttonNextStep.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (!preSavingChecks()){
+                if (!preSavingChecks()) {
                     return;
                 }
-                refreshOrderListsCombobox(comboBoxOrdersLists2);
                 tabbedPane1.setSelectedIndex(1);
             }
         });
 
 
 
-        /* LISTENERS OF TAB 2 */
+        /* -------- LISTENERS OF TAB 2 -------- */
 
 
         buttonRunAlgorithm.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (!preSavingChecks()){
+                if (!preSavingChecks()) {
                     return;
                 }
-                SavingAlgorithm savingAlgorithm = new SavingAlgorithm(orderLists.get(comboBoxOrdersLists2.getSelectedIndex()));
+                /*SavingAlgorithm savingAlgorithm = new SavingAlgorithm(orderLists.get(comboBoxOrdersLists2.getSelectedIndex()));
                 savingAlgorithm.runAlgorithm();
-                fillSavingTable(savingAlgorithm.getTableRowsData());
+                fillSavingTable(savingAlgorithm.getTableRowsData());*/
             }
         });
     }
@@ -234,58 +240,54 @@ public class MainGUI extends JFrame {
 
     /* GENERAL METHODS */
 
-    private void makeDataInitialization() {
-        orderLists = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
-            orderLists.add(OrderList.generateDefaultOrderList("Order list " + i));
-            //orderLists.add(OrderList.generateOrderListWithUniquePairs("Order list " + i, new int[]{2500,8600}, 2000));
-        }
+    private void dataInitialization() {
+        placeList = Place.generateDefaultPlaces();
+        distancesMatrix = Place.getDistancesMatrix();
+        myHeadquarter = Place.getPlaceByTitle(placeList, "Николаев"); // ALWAYS ABOVE vehicleList INITIALIZATION, OTHERWISE - NullPointerException
+        clientList = new ArrayList<>();
+        orderList = new ArrayList<>();
+        vehicleList = Vehicle.generateDefaultVehiclesList();
     }
 
-    private void makeFormInitialization() {
-        // ORDER LISTS INITIALIZATION
-        refreshOrderListsCombobox(comboBoxOrdersLists);
-
-        // ORDERS TABLE INITIALIZATION
-        DefaultTableModel model1 = (DefaultTableModel) tableOrdersList.getModel();
+    private void formInitialization() {
+        // CLIENT ORDERS TABLE INITIALIZATION
+        DefaultTableModel model1 = (DefaultTableModel) tableClientOrdersList.getModel();
         model1.setColumnIdentifiers(Order.getTableColumnsIdentifiers());
         model1.setRowCount(0);
 
-        // TRUCKS TABLE INITIALIZATION
-        DefaultTableModel model2 = (DefaultTableModel) tableTrucksList.getModel();
-        model2.setColumnIdentifiers(Vehicle.getTableColumnsIdentifiers());
+        // BASE ORDERS TABLE INITIALIZATION
+        DefaultTableModel model2 = (DefaultTableModel) tableBasesOrderList.getModel();
+        model2.setColumnIdentifiers(Order.getTableColumnsIdentifiers());
         model2.setRowCount(0);
 
-        fillVehicleTable(vehicleList);
+        // VEHICLES TABLE INITIALIZATION
+        DefaultTableModel model3 = (DefaultTableModel) tableVehiclesList.getModel();
+        model3.setColumnIdentifiers(Vehicle.getTableColumnsIdentifiers());
+        model3.setRowCount(0);
 
         // SAVING TABLE INITIALIZATION
-        DefaultTableModel model3 = (DefaultTableModel) tableSaving.getModel();
-        model3.setColumnIdentifiers(SavingAlgorithm.getTableColumnsIdentifiers());
-        model3.setRowCount(0);
+        DefaultTableModel model4 = (DefaultTableModel) tableSaving.getModel();
+        //model4.setColumnIdentifiers(SavingAlgorithm.getTableColumnsIdentifiers());
+        model4.setRowCount(0);
+
+        fillTableWithData(tableClientOrdersList, Order.getClientsOrderSublist(orderList));
+        fillTableWithData(tableBasesOrderList, Order.getBaseOrderSublist(orderList));
+        fillTableWithData(tableVehiclesList, vehicleList);
     }
 
 
     /* TABLES HELP METHODS */
 
-    private void fillOrderTable(List<Order> orders) {
-        removeRows(tableOrdersList);
-        DefaultTableModel model = (DefaultTableModel) tableOrdersList.getModel();
-        int i = 0;
-        for (Order order : orders) {
-            Object[] objects = order.getTableRowData();
-            objects[0] = i++;
-            model.addRow(objects);
-        }
+    private void refreshOrdersTables(){
+        fillTableWithData(tableClientOrdersList, Order.getClientsOrderSublist(orderList));
+        fillTableWithData(tableBasesOrderList, Order.getBaseOrderSublist(orderList));
     }
 
-    private void fillVehicleTable(List<Vehicle> vehicles) {
-        removeRows(tableTrucksList);
-        DefaultTableModel model = (DefaultTableModel) tableTrucksList.getModel();
-        int i = 0;
-        for (Vehicle vehicle : vehicles) {
-            Object[] objects = vehicle.getTableRowData();
-            objects[0] = i++;
-            model.addRow(objects);
+    private void fillTableWithData(JTable table, List<? extends ITableViewable> list) {
+        removeRows(table);
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+        for (ITableViewable element : list) {
+            model.addRow(element.getTableRowData());
         }
     }
 
@@ -304,33 +306,10 @@ public class MainGUI extends JFrame {
         }
     }
 
-    private void refreshOrdersTable() {
-        fillOrderTable(orderLists.get(comboBoxOrdersLists.getSelectedIndex()).getOrders());
-    }
-
     private boolean checkTableSelection(JTable table) {
         return !(table == null || table.getSelectedRow() == -1);
     }
 
-    /* HELP METHOD FOR COMBOBOXES */
-
-    private void refreshOrderListsCombobox(JComboBox comboBox) {
-        int count = comboBox.getItemCount();
-        for (OrderList orderList : orderLists) {
-            comboBox.addItem(orderList);
-        }
-        for (int i = 0; i < count; i++) {
-            comboBox.removeItemAt(0);
-        }
-    }
-
-    private boolean checkOrdersListComboBox() {
-        if (comboBoxOrdersLists == null || comboBoxOrdersLists.getSelectedIndex() == -1) {
-            JOptionPane.showMessageDialog(null, "No orders list was found.");
-            return false;
-        }
-        return true;
-    }
 
     /* OTHER HELP METHODS */
 
@@ -351,15 +330,18 @@ public class MainGUI extends JFrame {
 
     private void runOrderGUI(Order order) {
         OrderGUI.main(order);
-        refreshOrdersTable();
     }
 
-    private boolean preSavingChecks(){
-        if (orderLists.isEmpty()){
-            JOptionPane.showMessageDialog(null, "Order Lists is empty. Saving algorithm cannot be run.");
+    private void runVehicleGUI(Vehicle vehicle) {
+        VehicleGUI.main(vehicle);
+    }
+
+    private boolean preSavingChecks() {
+        if (orderList.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Order List is empty. Saving algorithm cannot be run.");
             return false;
         }
-        if (vehicleList.isEmpty()){
+        if (vehicleList.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Vehicles List is empty. Saving algorithm cannot be run.");
             return false;
         }

@@ -10,7 +10,7 @@ import java.util.List;
  * Created by Eezo on 02.11.2016.
  */
 public class OrderList {
-    private String title;
+    /*private String title;
     private List<Order> orders;
 
     public OrderList(String title, List<Order> orders) {
@@ -29,33 +29,33 @@ public class OrderList {
         return orders;
     }
 
-    /**
+    /* *
      * Generates an order list with 50 orders with random data (places pairs could repeat).
      * @param title order list title
      * @return an order list
-     */
+     * /
     public static OrderList generateDefaultOrderList(String title) {
         List<Order> orders = new ArrayList<>();
         for (int i = 0; i < 50; i++) {
-            orders.add(Order.generateRandomOrder());
+            orders.add(Order.generateDefaultOrder());
         }
         return new OrderList(title, orders);
     }
 
-    /**
+    /* *
      * Generates an order list with no-repeat places pairs (list size depends on <code>placeList.size()</code>).
      * @param title order list title
      * @param weightRange 2 numbers, possible weight value: [ weightRange[0], weightRange[1] ]
      * @param priceForTon a price for ton
      * @return an order list
-     */
+     *  /
     public static OrderList generateOrderListWithUniquePairs(String title, int[] weightRange, int priceForTon){
         List<Order> orders = new ArrayList<>();
         for (Place origin : MainGUI.placeList){
             for (Place destination : MainGUI.placeList){
                 if (origin.equals(destination)) continue;
                 int weight = MainGUI.getRandomNumberInRange(weightRange[0], weightRange[1]);
-                orders.add(new Order(Customer.getRandomCustomerFromList(MainGUI.customerList), origin, destination,
+                orders.add(new Order(Client.getRandomCustomerFromList(MainGUI.clientList), origin, destination,
                         weight, priceForTon, (7*24*60)));
             }
         }
@@ -65,5 +65,5 @@ public class OrderList {
     @Override
     public String toString() {
         return title;
-    }
+    }*/
 }

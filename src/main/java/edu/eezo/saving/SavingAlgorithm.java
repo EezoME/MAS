@@ -14,7 +14,7 @@ import java.util.List;
  * Created by Eezo on 06.11.2016.
  */
 public class SavingAlgorithm {
-    private List<SavingRowAtom> list;
+    /*private List<SavingRowAtom> list;
 
     public SavingAlgorithm(OrderList orderList) {
         if (orderList == null || orderList.getOrders().isEmpty()) {
@@ -130,7 +130,7 @@ public class SavingAlgorithm {
          * <li><code>Sdh</code> - is a distance between destination and headquarter</li>
          * <li><code>Sod</code> - is a distance between origin and destination</li>
          * </ul>
-         */
+         * /
         private long distance;
         private boolean isOnRoute;
 
@@ -154,5 +154,5 @@ public class SavingAlgorithm {
         public int compareTo(SavingRowAtom o) {
             return (int) (distance - o.distance);
         }
-    }
+    }*/
 }

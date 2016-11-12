@@ -1,102 +1,189 @@
 package edu.eezo.data;
 
-import edu.eezo.MainGUI;
-
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Class represents an order.
  * Created by Eezo on 02.11.2016.
  */
-public class Order {
+public class Order implements ITableViewable {
+    /**
+     * Default value for <code>fine</code>.
+     */
+    public static int defaultFine = 100;
+    private static int orderCounter = 0;
+
+    private int id;
     /**
      * The timing of the order.<br/>
      * <i>ТЗ:</i> Час надходження замовлення.
      */
     private Date orderReceiptTime;
-    private Customer customer;
     /**
-     * From what point it is necessary to make the movement.<br/>
+     * The one who ordered.
+     */
+    private Client client;
+    /**
+     * Indicates if this order from the base (false for clients orders).
+     */
+    private boolean isBases;
+    /**
+     * From what location it is necessary to make the movement.<br/>
      * <i>ТЗ:</i> З якого пункту необхідно зробити переміщення.
      */
     private Place origin;
     /**
-     * Up to what point it is necessary to make the movement.<br/>
+     * Up to what location it is necessary to make the movement.<br/>
      * <i>ТЗ:</i> До я кого пункту необхідно зробити переміщення.
      */
     private Place destination;
     /**
-     * A weight of order in kilograms (kg) that need to be moved.<br/>
+     * A freight of order in tons (tn) that need to be moved.<br/>
      * <i>ТЗ:</i> Вага замовлення.
      */
-    private int weight; // kilograms
+    private double freightVolume;
     /**
-     * The maximum value that the customer can pay for transportation (in UAH).<br/>
-     * <i>ТЗ:</i> Максимальна вартість, яку може заплатити клієнт.
-     */
-    private int maxPrice;
-    /**
-     * Time of the order (from the date of the order); in minutes.<br/>
+     * Time of the order (from the date of the order); in hours.<br/>
      * <i>ТЗ:</i>Час на виконання замовлення (від моменту надходження замовлення).
      */
-    private long deliveryDuration;
+    private double timeOfDelivery;
+    /**
+     * The maximum value that client can pay for transportation (in UAH).<br/>
+     * <i>ТЗ:</i> Максимальна вартість, яку може заплатити клієнт.
+     */
+    private int maxCost;
     /**
      * Penalties for late execution of the order (by default: 100 UAH / 1 hour).<br/>
      * <i>ТЗ:</i> Штрафні санкції за невчасне виконання замовлення (за замовчуванням: 100 грн / 1 год).
      */
     private int fine;
 
-    /**
-     * Default value for <code>fine</code>.
-     */
-    public static int DEFAULT_FINE = 100;
 
     Order() {
+        this.id = orderCounter++;
         this.orderReceiptTime = new Date(System.currentTimeMillis());
     }
 
     /**
      * Creates an order (short way).
-     * @param customer orders customer
-     * @param origin order origin
-     * @param destination order destination
-     * @param weight cargo weight (in kilograms)
-     * @param priceForTon price per ton (in UAH)
-     * @param deliveryDuration maximal duration of transportation (in minutes)
+     *
+     * @param client         orders client
+     * @param isBases        is order form base
+     * @param origin         orders origin
+     * @param destination    orders destination
+     * @param freightVolume  orders freight volume (in tons)
+     * @param timeOfDelivery maximal duration of transportation (in hrs)
      */
-    public Order(Customer customer, Place origin, Place destination, int weight, int priceForTon, long deliveryDuration) {
-        this(new Date(System.currentTimeMillis()), customer, origin, destination, weight, (int) (priceForTon * weight / 1000.0), deliveryDuration, DEFAULT_FINE);
+    public Order(Client client, boolean isBases, Place origin, Place destination, int freightVolume, int priceForTon, double timeOfDelivery) {
+        this(new Date(System.currentTimeMillis()), client, isBases, origin, destination, freightVolume, (int) (priceForTon * freightVolume / 1000.0), timeOfDelivery, defaultFine);
     }
 
     /**
      * Creates an order.
+     *
      * @param orderReceiptTime the timing of the order
-     * @param customer orders customer
-     * @param origin order origin
-     * @param destination order destination
-     * @param weight cargo weight (in kilograms)
-     * @param maxPrice maximal price that customer can pay for transportation (in UAH)
-     * @param deliveryDuration maximal duration of transportation (in minutes)
-     * @param fine penalties for late execution of the order (in UAH)
+     * @param client           orders client
+     * @param isBases          is order form base
+     * @param origin           orders origin
+     * @param destination      orders destination
+     * @param freightVolume    orders freight volume (in tons)
+     * @param maxCost          maximal cost that client can pay for transportation (in UAH)
+     * @param timeOfDelivery   maximal duration of transportation (in hrs)
+     * @param fine             penalties for late execution of the order (in UAH)
      */
-    public Order(Date orderReceiptTime, Customer customer, Place origin, Place destination, int weight, int maxPrice,
-                 long deliveryDuration, int fine) {
+    public Order(Date orderReceiptTime, Client client, boolean isBases, Place origin, Place destination, double freightVolume, int maxCost,
+                 double timeOfDelivery, int fine) {
+        this.id = orderCounter++;
         this.orderReceiptTime = orderReceiptTime;
-        this.customer = customer;
+        this.client = client;
+        this.isBases = isBases;
         this.origin = origin;
         this.destination = destination;
-        this.weight = weight;
-        this.maxPrice = maxPrice;
-        this.deliveryDuration = deliveryDuration;
+        this.freightVolume = freightVolume;
+        this.maxCost = maxCost;
+        this.timeOfDelivery = timeOfDelivery;
         this.fine = fine;
     }
+
+    /**
+     * Returns a sublist only with clients orders.
+     * @param orderList general orders list
+     * @return orders sublist
+     */
+    public static List<Order> getClientsOrderSublist(List<Order> orderList) {
+        List<Order> list = new ArrayList<>();
+        for (Order order : orderList) {
+            if (!order.isBases) {
+                list.add(order);
+            }
+        }
+        return list;
+    }
+
+    /**
+     * Returns a sublist only with base orders.
+     * @param orderList general orders list
+     * @return orders sublist
+     */
+    public static List<Order> getBaseOrderSublist(List<Order> orderList) {
+        List<Order> list = new ArrayList<>();
+        for (Order order : orderList) {
+            if (order.isBases) {
+                list.add(order);
+            }
+        }
+        return list;
+    }
+
+    public static Order getOrderById(List<Order> orderList, int id) {
+        for (Order order : orderList) {
+            if (order.id == id) {
+                return order;
+            }
+        }
+        return null;
+    }
+
+    public static Order generateDefaultOrder(boolean isBased) {
+        return new Order(null, isBased, null, null, 0, 0, 0.0d);
+    }
+
+    public static String[] getTableColumnsIdentifiers() {
+        return new String[]{"ID", "Timing", "Client", "Origin", "Destination", "Freight Volume", "Time for delivery",
+                "Max Cost", "Fine"};
+    }
+
+
+    public Object[] getTableRowData() {
+        return new Object[]{id, orderReceiptTime, client, origin, destination, getReadableWeight(), getReadableDeliveryTime(),
+                getReadableCost(maxCost), getReadableCost(fine)};
+    }
+
+    private String getReadableWeight() {
+        return freightVolume + " tn";
+    }
+
+    private String getReadableDeliveryTime() {
+        return timeOfDelivery + " hrs";
+    }
+
+    private String getReadableCost(int cost) {
+        return cost + " UAH";
+    }
+
 
     public Date getOrderReceiptTime() {
         return orderReceiptTime;
     }
 
-    public Customer getCustomer() {
-        return customer;
+    public Client getClient() {
+        return client;
+    }
+
+    public boolean isBases() {
+        return isBases;
     }
 
     public Place getOrigin() {
@@ -107,16 +194,16 @@ public class Order {
         return destination;
     }
 
-    public int getWeight() {
-        return weight;
+    public double getFreightVolume() {
+        return freightVolume;
     }
 
-    public int getMaxPrice() {
-        return maxPrice;
+    public int getMaxCost() {
+        return maxCost;
     }
 
-    public long getDeliveryDuration() {
-        return deliveryDuration;
+    public double getTimeOfDelivery() {
+        return timeOfDelivery;
     }
 
     public int getFine() {
@@ -127,8 +214,12 @@ public class Order {
         this.orderReceiptTime = orderReceiptTime;
     }
 
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
+    public void setClient(Client client) {
+        this.client = client;
+    }
+
+    public void setBases(boolean bases) {
+        isBases = bases;
     }
 
     public void setOrigin(Place origin) {
@@ -139,45 +230,19 @@ public class Order {
         this.destination = destination;
     }
 
-    public void setWeight(int weight) {
-        this.weight = weight;
+    public void setFreightVolume(double freightVolume) {
+        this.freightVolume = freightVolume;
     }
 
-    public void setMaxPrice(int maxPrice) {
-        this.maxPrice = maxPrice;
+    public void setMaxCost(int maxCost) {
+        this.maxCost = maxCost;
     }
 
-    public void setDeliveryDuration(long deliveryDuration) {
-        this.deliveryDuration = deliveryDuration;
+    public void setTimeOfDelivery(double timeOfDelivery) {
+        this.timeOfDelivery = timeOfDelivery;
     }
 
     public void setFine(int fine) {
         this.fine = fine;
-    }
-
-    public static Order generateRandomOrder() {
-        Date current = new Date(System.currentTimeMillis());
-        long deliveryDuration = 7 * 24 * 60; // 1 week by default
-        Place origin = Place.getRandomPlaceFromList(MainGUI.placeList);
-        int weight = MainGUI.getRandomNumberInRange(1800, 8500);
-        return new Order(current, MainGUI.customerList.get(MainGUI.getRandomNumberInRange(0, MainGUI.customerList.size())),
-                origin, Place.getRandomPlaceFromListExclude(MainGUI.placeList, origin),
-                weight, weight * 2, deliveryDuration, DEFAULT_FINE);
-    }
-
-    public static String[] getTableColumnsIdentifiers() {
-        return new String[]{"№", "Customer", "Origin", "Destination", "Weight", "Max Price"};
-    }
-
-    public Object[] getTableRowData() {
-        return new Object[]{0, customer, origin, destination, getReadableWeight(), getReadablePrice()};
-    }
-
-    private String getReadableWeight() {
-        return weight / 1000.0 + " t";
-    }
-
-    private String getReadablePrice() {
-        return maxPrice + " UAH";
     }
 }

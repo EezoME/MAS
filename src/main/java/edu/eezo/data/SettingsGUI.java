@@ -3,9 +3,7 @@ package edu.eezo.data;
 import edu.eezo.MainGUI;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.*;
-import java.util.Arrays;
 
 public class SettingsGUI extends JDialog {
     private JPanel contentPane;
@@ -14,12 +12,13 @@ public class SettingsGUI extends JDialog {
     private JComboBox comboBoxHeadquarter;
     private JComboBox comboBoxPlaces;
     private JButton buttonAddPlace;
-    private JComboBox comboBoxCustomers;
-    private JButton addNewCustomerButton;
+    private JComboBox comboBoxClients;
+    private JButton buttonAddClient;
     private JTextField textFieldCityInput;
     private JTextField textFieldRegionInput;
-    private JTextField textFieldCustomerNameInput;
-    private JComboBox comboBoxCustomerHeadquarterInput;
+    private JTextField textFieldClientNameInput;
+    private JComboBox comboBoxClientOrdersInput;
+    private JComboBox comboBoxBaseOrdersInput;
 
     public SettingsGUI() {
         setTitle("General Settings -- MAS");
@@ -30,7 +29,7 @@ public class SettingsGUI extends JDialog {
         setLocationRelativeTo(getParent());
 
         refreshPlacesCBs();
-        refresgCustomersCB();
+        refreshClientsCB();
         comboBoxHeadquarter.setSelectedItem(MainGUI.myHeadquarter);
 
         buttonOK.addActionListener(new ActionListener() {
@@ -73,16 +72,16 @@ public class SettingsGUI extends JDialog {
                 JOptionPane.showMessageDialog(null, "A new place added.");
             }
         });
-        addNewCustomerButton.addActionListener(new ActionListener() {
+        buttonAddClient.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (textFieldCustomerNameInput.getText().isEmpty()) {
+                if (textFieldClientNameInput.getText().isEmpty()) {
                     JOptionPane.showMessageDialog(null, "You don't input customer name or title.");
                     return;
                 }
-                Customer newCustomer = new Customer(textFieldCustomerNameInput.getText(), (Place) comboBoxCustomerHeadquarterInput.getSelectedItem());
-                MainGUI.customerList.add(newCustomer);
-                refresgCustomersCB();
+                Client newClient = new Client(textFieldClientNameInput.getText(), null, null);
+                MainGUI.clientList.add(newClient);
+                refreshClientsCB();
                 JOptionPane.showMessageDialog(null, "A new customer added.");
             }
         });
@@ -106,22 +105,20 @@ public class SettingsGUI extends JDialog {
 
 
     private void refreshPlacesCBs() {
-        Place headquerter = (Place) comboBoxHeadquarter.getSelectedItem();
+        Place headquarter = (Place) comboBoxHeadquarter.getSelectedItem();
         comboBoxPlaces.removeAllItems();
         comboBoxHeadquarter.removeAllItems();
-        comboBoxCustomerHeadquarterInput.removeAllItems();
         for (Place place : MainGUI.placeList) {
             comboBoxPlaces.addItem(place);
             comboBoxHeadquarter.addItem(place);
-            comboBoxCustomerHeadquarterInput.addItem(place);
         }
-        comboBoxHeadquarter.setSelectedItem(headquerter);
+        comboBoxHeadquarter.setSelectedItem(headquarter);
     }
 
-    private void refresgCustomersCB() {
-        comboBoxCustomers.removeAllItems();
-        for (Customer customer : MainGUI.customerList) {
-            comboBoxCustomers.addItem(customer);
+    private void refreshClientsCB() {
+        comboBoxClients.removeAllItems();
+        for (Client client : MainGUI.clientList) {
+            comboBoxClients.addItem(client);
         }
     }
 }

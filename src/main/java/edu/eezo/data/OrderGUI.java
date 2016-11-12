@@ -12,18 +12,20 @@ public class OrderGUI extends JDialog {
     private JButton buttonCancel;
     private JLabel labelTop;
     private JTextField textFieldReceiptTime;
-    private JComboBox comboBoxCustomer;
+    private JComboBox comboBoxClient;
     private JComboBox comboBoxOrigin;
     private JComboBox comboBoxDestination;
-    private JTextField textFieldWeight;
-    private JTextField textFieldMaxPrice;
+    private JTextField textFieldFreight;
+    private JTextField textFieldMaxCost;
     private JTextField textFieldDeliveryDuration;
     private JTextField textFieldFine;
+    private JCheckBox checkBoxIsBases;
 
     private Order order;
 
     public OrderGUI(Order order) {
         setContentPane(contentPane);
+        setTitle("Order GUI -- MAS");
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
         if (order == null) {
@@ -33,8 +35,8 @@ public class OrderGUI extends JDialog {
             this.order = order;
         }
 
-        for (Customer customer : MainGUI.customerList) {
-            comboBoxCustomer.addItem(customer);
+        for (Client client : MainGUI.clientList) {
+            comboBoxClient.addItem(client);
         }
 
         for (Place place : MainGUI.placeList) {
@@ -77,12 +79,13 @@ public class OrderGUI extends JDialog {
             return;
         }
         textFieldReceiptTime.setText(order.getOrderReceiptTime().toString());
-        comboBoxCustomer.setSelectedItem(order.getCustomer());
+        comboBoxClient.setSelectedItem(order.getClient());
+        checkBoxIsBases.setSelected(order.isBases());
         comboBoxOrigin.setSelectedItem(order.getOrigin());
         comboBoxDestination.setSelectedItem(order.getDestination());
-        textFieldWeight.setText(order.getWeight() + "");
-        textFieldMaxPrice.setText(order.getMaxPrice() + "");
-        textFieldDeliveryDuration.setText(order.getDeliveryDuration() + "");
+        textFieldFreight.setText(order.getFreightVolume() + "");
+        textFieldMaxCost.setText(order.getMaxCost() + "");
+        textFieldDeliveryDuration.setText(order.getTimeOfDelivery() + "");
         textFieldFine.setText(order.getFine() + "");
     }
 
@@ -90,7 +93,7 @@ public class OrderGUI extends JDialog {
         if (!checkRequiredFields()) {
             return;
         }
-        if (checkOptionalFields()) {
+        if (!checkOptionalFields()) {
             return;
         }
         if (order == null) {
@@ -106,18 +109,19 @@ public class OrderGUI extends JDialog {
                 order.setOrderReceiptTime(date);
             }
         }
-        order.setCustomer((Customer) comboBoxCustomer.getSelectedItem());
+        order.setClient((Client) comboBoxClient.getSelectedItem());
+        order.setBases(checkBoxIsBases.isSelected());
         order.setOrigin((Place) comboBoxOrigin.getSelectedItem());
         order.setDestination((Place) comboBoxDestination.getSelectedItem());
-        order.setWeight(Integer.parseInt(textFieldWeight.getText()));
-        order.setMaxPrice(Integer.parseInt(textFieldMaxPrice.getText()));
+        order.setFreightVolume(Double.parseDouble(textFieldFreight.getText()));
+        order.setMaxCost(Integer.parseInt(textFieldMaxCost.getText()));
         if (textFieldDeliveryDuration.getText().isEmpty()) {
-            order.setDeliveryDuration(order.getOrderReceiptTime().getTime() + Long.parseLong(textFieldDeliveryDuration.getText()) * (60 * 1000));
+            order.setTimeOfDelivery(48.0);
         } else {
-            order.setDeliveryDuration(Long.parseLong(textFieldDeliveryDuration.getText()));
+            order.setTimeOfDelivery(Double.parseDouble(textFieldDeliveryDuration.getText()));
         }
         if (textFieldFine.getText().isEmpty()) {
-            order.setFine(Order.DEFAULT_FINE);
+            order.setFine(Order.defaultFine);
         } else {
             order.setFine(Integer.parseInt(textFieldFine.getText()));
         }
@@ -137,31 +141,31 @@ public class OrderGUI extends JDialog {
     }
 
     private boolean checkRequiredFields() {
-        if (textFieldWeight.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Specify the weight.");
+        if (textFieldFreight.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Specify the freight.");
             return false;
         }
         try {
-            if (Integer.parseInt(textFieldWeight.getText()) <= 0) {
-                JOptionPane.showMessageDialog(null, "Weight value must be grater than 0.");
+            if (Double.parseDouble(textFieldFreight.getText()) <= 0) {
+                JOptionPane.showMessageDialog(null, "Freight value must be grater than 0.");
                 return false;
             }
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(null, "Weight value is not a number!");
+            JOptionPane.showMessageDialog(null, "Freight value is not a number!");
             return false;
         }
 
-        if (textFieldMaxPrice.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Specify the price.");
+        if (textFieldMaxCost.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Specify the cost.");
             return false;
         }
         try {
-            if (Integer.parseInt(textFieldMaxPrice.getText()) <= 0) {
-                JOptionPane.showMessageDialog(null, "Max price value must be grater than 0.");
+            if (Integer.parseInt(textFieldMaxCost.getText()) <= 0) {
+                JOptionPane.showMessageDialog(null, "Max cost value must be grater than 0.");
                 return false;
             }
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(null, "Max price value is not a number!");
+            JOptionPane.showMessageDialog(null, "Max cost value is not a number!");
             return false;
         }
 
@@ -170,14 +174,14 @@ public class OrderGUI extends JDialog {
 
     private boolean checkOptionalFields() {
         if (textFieldDeliveryDuration.getText().isEmpty()) {
-            System.out.println("INFO: You didn't specified delivery duration. It will be set to default (1 week).");
+            System.out.println("INFO: You didn't specified delivery duration. It will be set to default (48 hrs).");
         }
         if (textFieldFine.getText().isEmpty()) {
             System.out.println("INFO: You didn't specified fine. It will be set to default (100 UAH/hour).");
         }
 
         try {
-            if (Long.parseLong(textFieldDeliveryDuration.getText()) <= 0) {
+            if (Double.parseDouble(textFieldDeliveryDuration.getText()) <= 0) {
                 JOptionPane.showMessageDialog(null, "Delivery duration value must be grater than 0.");
                 return false;
             }
