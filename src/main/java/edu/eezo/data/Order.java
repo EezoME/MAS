@@ -1,5 +1,7 @@
 package edu.eezo.data;
 
+import edu.eezo.MainGUI;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -109,6 +111,7 @@ public class Order implements ITableViewable {
 
     /**
      * Returns a sublist only with clients orders.
+     *
      * @param orderList general orders list
      * @return orders sublist
      */
@@ -124,6 +127,7 @@ public class Order implements ITableViewable {
 
     /**
      * Returns a sublist only with base orders.
+     *
      * @param orderList general orders list
      * @return orders sublist
      */
@@ -150,6 +154,64 @@ public class Order implements ITableViewable {
         return new Order(null, isBased, null, null, 0, 0, 0.0d);
     }
 
+    /**
+     * Generates an order list that includes client and base orders.
+     *
+     * @param clientOrdersCount number of client orders in list
+     * @param baseOrdersCount   number of base orders in list
+     * @return a list of orders
+     */
+    public static List<Order> generateRandomOrderList(int clientOrdersCount, int baseOrdersCount) {
+        List<Order> orders = generateRandomBaseOrderList(baseOrdersCount);
+        orders.addAll(generateRandomClientOrderList(clientOrdersCount));
+        return orders;
+    }
+
+    /**
+     * Generates an order list that includes only client orders.
+     *
+     * @param count number of orders in list
+     * @return a list of orders from clients
+     */
+    public static List<Order> generateRandomClientOrderList(int count) {
+        if (count > 0) {
+            List<Order> clientOrders = new ArrayList<>();
+            for (int i = 0; i < count; i++) {
+                Place origin = Place.getRandomPlaceFromListExclude(MainGUI.placeList, MainGUI.myHeadquarter);
+                Place destination;
+                while ((destination = Place.getRandomPlaceFromListExclude(MainGUI.placeList, origin)).equals(MainGUI.myHeadquarter)); // to avoid myHeadquarter here
+                int cost = (int) (Math.round(12.0 * Place.getDistanceBetweenPlaces(origin, destination) / 1000)); // 12 UAH / 1 km
+                clientOrders.add(new Order(new Date(System.currentTimeMillis() - 3 * 24 * 60 * 60 * 1000), null, false, origin,
+                        destination, 15.0, cost, 10 * 24, defaultFine));
+            }
+            return clientOrders;
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Generates an order list that includes only base orders.
+     *
+     * @param count number of orders in list
+     * @return a list of orders from base
+     */
+    public static List<Order> generateRandomBaseOrderList(int count) {
+        if (count > 0) {
+            List<Order> baseOrders = new ArrayList<>();
+            for (int i = 0; i < count; i++) {
+                Place origin = MainGUI.myHeadquarter;
+                Place destination = Place.getRandomPlaceFromListExclude(MainGUI.placeList, MainGUI.myHeadquarter);
+                int cost = (int) (Math.round(12.0 * Place.getDistanceBetweenPlaces(origin, destination) / 1000)); // 12 UAH / 1 km
+                baseOrders.add(new Order(new Date(System.currentTimeMillis() - 3 * 24 * 60 * 60 * 1000), null, true, origin,
+                        destination, 15.0, cost, 10 * 24, defaultFine));
+            }
+            return baseOrders;
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
     public static String[] getTableColumnsIdentifiers() {
         return new String[]{"ID", "Timing", "Client", "Origin", "Destination", "Freight Volume", "Time for delivery",
                 "Max Cost", "Fine"};
@@ -173,6 +235,14 @@ public class Order implements ITableViewable {
         return cost + " UAH";
     }
 
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public Date getOrderReceiptTime() {
         return orderReceiptTime;
@@ -244,5 +314,10 @@ public class Order implements ITableViewable {
 
     public void setFine(int fine) {
         this.fine = fine;
+    }
+
+    @Override
+    public String toString() {
+        return id + "";
     }
 }

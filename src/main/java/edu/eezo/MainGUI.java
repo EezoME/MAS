@@ -2,6 +2,7 @@ package edu.eezo;
 
 import edu.eezo.data.*;
 import edu.eezo.saving.SavingAlgorithm;
+import edu.eezo.saving.SavingTable;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -31,12 +32,10 @@ public class MainGUI extends JFrame {
     private JButton buttonAddVehicle;
     private JButton buttonEditVehicle;
     private JButton buttonRemoveVehicle;
-    private JComboBox comboBoxOrdersLists2;
     private JButton buttonRunAlgorithm;
     private JTable tableSaving;
     private JLabel labelGlobalRoute;
     private JButton buttonBuildLocalRoutes;
-    private JLabel labelTakeAWhile;
     private JButton buttonData;
     private JButton buttonNextStep;
 
@@ -199,6 +198,8 @@ public class MainGUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 SettingsGUI.main(null);
+                fillTableWithData(tableClientOrdersList, Order.getClientsOrderSublist(orderList));
+                fillTableWithData(tableBasesOrderList, Order.getBaseOrderSublist(orderList));
             }
         });
         buttonNextStep.addActionListener(new ActionListener() {
@@ -222,9 +223,10 @@ public class MainGUI extends JFrame {
                 if (!preSavingChecks()) {
                     return;
                 }
-                /*SavingAlgorithm savingAlgorithm = new SavingAlgorithm(orderLists.get(comboBoxOrdersLists2.getSelectedIndex()));
+                SavingAlgorithm savingAlgorithm = new SavingAlgorithm(orderList);
                 savingAlgorithm.runAlgorithm();
-                fillSavingTable(savingAlgorithm.getTableRowsData());*/
+                fillSavingTable(savingAlgorithm.getSavingTable().getTableRowData());
+                labelGlobalRoute.setText(savingAlgorithm.getGlobalRoute().getRouteIds());
             }
         });
     }
@@ -243,9 +245,9 @@ public class MainGUI extends JFrame {
     private void dataInitialization() {
         placeList = Place.generateDefaultPlaces();
         distancesMatrix = Place.getDistancesMatrix();
-        myHeadquarter = Place.getPlaceByTitle(placeList, "Николаев"); // ALWAYS ABOVE vehicleList INITIALIZATION, OTHERWISE - NullPointerException
+        myHeadquarter = Place.getPlaceByTitle(placeList, "Николаев"); // ALWAYS ABOVE vehicleList AND orderList INITIALIZATION, OTHERWISE - NullPointerException
         clientList = new ArrayList<>();
-        orderList = new ArrayList<>();
+        orderList = Order.generateRandomOrderList(5, 5);
         vehicleList = Vehicle.generateDefaultVehiclesList();
     }
 
@@ -267,7 +269,7 @@ public class MainGUI extends JFrame {
 
         // SAVING TABLE INITIALIZATION
         DefaultTableModel model4 = (DefaultTableModel) tableSaving.getModel();
-        //model4.setColumnIdentifiers(SavingAlgorithm.getTableColumnsIdentifiers());
+        model4.setColumnIdentifiers(SavingTable.getTableColumnsIdentifiers());
         model4.setRowCount(0);
 
         fillTableWithData(tableClientOrdersList, Order.getClientsOrderSublist(orderList));
@@ -278,7 +280,7 @@ public class MainGUI extends JFrame {
 
     /* TABLES HELP METHODS */
 
-    private void refreshOrdersTables(){
+    private void refreshOrdersTables() {
         fillTableWithData(tableClientOrdersList, Order.getClientsOrderSublist(orderList));
         fillTableWithData(tableBasesOrderList, Order.getBaseOrderSublist(orderList));
     }

@@ -72,6 +72,17 @@ public class OrderGUI extends JDialog {
                 onCancel();
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        checkBoxIsBases.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (checkBoxIsBases.isSelected()) {
+                    comboBoxOrigin.setSelectedItem(MainGUI.myHeadquarter);
+                    comboBoxOrigin.setEnabled(false);
+                } else {
+                    comboBoxOrigin.setEnabled(true);
+                }
+            }
+        });
     }
 
     private void showData() {
@@ -87,6 +98,11 @@ public class OrderGUI extends JDialog {
         textFieldMaxCost.setText(order.getMaxCost() + "");
         textFieldDeliveryDuration.setText(order.getTimeOfDelivery() + "");
         textFieldFine.setText(order.getFine() + "");
+
+        if (order.isBases()) {
+            comboBoxOrigin.setSelectedItem(MainGUI.myHeadquarter);
+            comboBoxOrigin.setEnabled(false);
+        }
     }
 
     private void onOK() {
@@ -166,6 +182,11 @@ public class OrderGUI extends JDialog {
             }
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(null, "Max cost value is not a number!");
+            return false;
+        }
+
+        if (comboBoxOrigin.getSelectedItem().equals(comboBoxDestination.getSelectedItem())) {
+            JOptionPane.showMessageDialog(null, "Origin and destination can't be the same place.");
             return false;
         }
 

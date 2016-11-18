@@ -4,6 +4,8 @@ import edu.eezo.MainGUI;
 
 import javax.swing.*;
 import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SettingsGUI extends JDialog {
     private JPanel contentPane;
@@ -31,6 +33,7 @@ public class SettingsGUI extends JDialog {
         refreshPlacesCBs();
         refreshClientsCB();
         comboBoxHeadquarter.setSelectedItem(MainGUI.myHeadquarter);
+        initBaseOrdersCB();
 
         buttonOK.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -79,7 +82,17 @@ public class SettingsGUI extends JDialog {
                     JOptionPane.showMessageDialog(null, "You don't input customer name or title.");
                     return;
                 }
-                Client newClient = new Client(textFieldClientNameInput.getText(), null, null);
+                Client newClient;
+                if (comboBoxBaseOrdersInput.isEnabled()){
+                    Order baseOrder = (Order) comboBoxBaseOrdersInput.getSelectedItem();
+                    List<Order> orders = new ArrayList<>();
+                    orders.add(baseOrder);
+                    newClient = new Client(textFieldClientNameInput.getText(), orders, null);
+                    baseOrder.setClient(newClient);
+                    initBaseOrdersCB();
+                } else {
+                    newClient = new Client(textFieldClientNameInput.getText(), null, null);
+                }
                 MainGUI.clientList.add(newClient);
                 refreshClientsCB();
                 JOptionPane.showMessageDialog(null, "A new customer added.");
@@ -119,6 +132,22 @@ public class SettingsGUI extends JDialog {
         comboBoxClients.removeAllItems();
         for (Client client : MainGUI.clientList) {
             comboBoxClients.addItem(client);
+        }
+    }
+
+    private void initBaseOrdersCB(){
+        comboBoxBaseOrdersInput.removeAllItems();
+        if (MainGUI.orderList == null){
+            comboBoxBaseOrdersInput.addItem("Add a base order at main window.");
+            comboBoxBaseOrdersInput.setEnabled(false);
+            return;
+        }
+        comboBoxBaseOrdersInput.setEnabled(true);
+        List<Order> baseOrders = Order.getBaseOrderSublist(MainGUI.orderList);
+        for (Order order : baseOrders){
+            if (order.getClient() == null) {
+                comboBoxBaseOrdersInput.addItem(order);
+            }
         }
     }
 }

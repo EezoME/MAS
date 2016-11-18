@@ -11,6 +11,9 @@ import java.util.List;
  * Created by Eezo on 02.11.2016.
  */
 public class Place {
+    private static int counter = 0;
+
+    private int id;
     /**
      * Location title (usually, city name).
      */
@@ -28,6 +31,7 @@ public class Place {
      * @param gmapsAddressAddition region addition (like "Николаевская область, Украина")
      */
     public Place(String title, String gmapsAddressAddition) {
+        this.id = counter++;
         this.title = title;
         this.gmapsAddress = title + ", " + gmapsAddressAddition;
     }
@@ -198,6 +202,15 @@ public class Place {
         return null;
     }
 
+    public static int getPlaceIndex(List<Place> placeList, Place place){
+        for (int i = 0; i < placeList.size(); i++) {
+            if (placeList.get(i).equals(place)){
+                return i;
+            }
+        }
+        return -1;
+    }
+
     /**
      * Returns a random place form specified list.
      *
@@ -223,6 +236,12 @@ public class Place {
         return place;
     }
 
+    public static long getDistanceBetweenPlaces(Place origin, Place destination){
+        int originIndex = getPlaceIndex(MainGUI.placeList, origin);
+        int destinationIndex = getPlaceIndex(MainGUI.placeList, destination);
+        return MainGUI.distancesMatrix[originIndex][destinationIndex];
+    }
+
     public static boolean isPlaceInList(List<Place> placeList, Place place) {
         for (Place p : placeList) {
             if (p.equals(place)) {
@@ -232,8 +251,16 @@ public class Place {
         return false;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
     @Override
     public String toString() {
-        return title;
+        return title + " (" + id + ")";
     }
 }
