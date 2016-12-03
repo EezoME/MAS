@@ -21,6 +21,7 @@ public class SettingsGUI extends JDialog {
     private JTextField textFieldClientNameInput;
     private JComboBox comboBoxClientOrdersInput;
     private JComboBox comboBoxBaseOrdersInput;
+    private JCheckBox checkBoxNoOrders;
 
     public SettingsGUI() {
         setTitle("General Settings -- MAS");
@@ -69,12 +70,15 @@ public class SettingsGUI extends JDialog {
                     JOptionPane.showMessageDialog(null, "You don't input city.");
                     return;
                 }
+
                 Place newPlace = new Place(textFieldCityInput.getText(), textFieldRegionInput.getText());
                 MainGUI.placeList.add(newPlace);
+
                 refreshPlacesCBs();
                 JOptionPane.showMessageDialog(null, "A new place added.");
             }
         });
+
         buttonAddClient.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -82,8 +86,10 @@ public class SettingsGUI extends JDialog {
                     JOptionPane.showMessageDialog(null, "You don't input customer name or title.");
                     return;
                 }
+
                 Client newClient;
-                if (comboBoxBaseOrdersInput.isEnabled()){
+
+                if (comboBoxBaseOrdersInput.isEnabled()) {
                     Order baseOrder = (Order) comboBoxBaseOrdersInput.getSelectedItem();
                     List<Order> orders = new ArrayList<>();
                     orders.add(baseOrder);
@@ -93,9 +99,18 @@ public class SettingsGUI extends JDialog {
                 } else {
                     newClient = new Client(textFieldClientNameInput.getText(), null, null);
                 }
+
                 MainGUI.clientList.add(newClient);
+
                 refreshClientsCB();
                 JOptionPane.showMessageDialog(null, "A new customer added.");
+            }
+        });
+
+        checkBoxNoOrders.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                comboBoxBaseOrdersInput.setEnabled(!checkBoxNoOrders.isSelected());
             }
         });
     }
@@ -121,30 +136,35 @@ public class SettingsGUI extends JDialog {
         Place headquarter = (Place) comboBoxHeadquarter.getSelectedItem();
         comboBoxPlaces.removeAllItems();
         comboBoxHeadquarter.removeAllItems();
+
         for (Place place : MainGUI.placeList) {
             comboBoxPlaces.addItem(place);
             comboBoxHeadquarter.addItem(place);
         }
+
         comboBoxHeadquarter.setSelectedItem(headquarter);
     }
 
     private void refreshClientsCB() {
         comboBoxClients.removeAllItems();
+
         for (Client client : MainGUI.clientList) {
             comboBoxClients.addItem(client);
         }
     }
 
-    private void initBaseOrdersCB(){
+    private void initBaseOrdersCB() {
         comboBoxBaseOrdersInput.removeAllItems();
-        if (MainGUI.orderList == null){
+
+        if (MainGUI.orderList == null) {
             comboBoxBaseOrdersInput.addItem("Add a base order at main window.");
             comboBoxBaseOrdersInput.setEnabled(false);
             return;
         }
         comboBoxBaseOrdersInput.setEnabled(true);
+
         List<Order> baseOrders = Order.getBaseOrderSublist(MainGUI.orderList);
-        for (Order order : baseOrders){
+        for (Order order : baseOrders) {
             if (order.getClient() == null) {
                 comboBoxBaseOrdersInput.addItem(order);
             }

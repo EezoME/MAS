@@ -11,22 +11,27 @@ import java.util.List;
  * Created by Eezo on 02.11.2016.
  */
 public class Order implements ITableViewable {
+
     /**
      * Default value for <code>fine</code>.
      */
     public static int defaultFine = 100;
+
     private static int orderCounter = 0;
 
     private int id;
+
     /**
      * The timing of the order.<br/>
      * <i>ТЗ:</i> Час надходження замовлення.
      */
     private Date orderReceiptTime;
+
     /**
      * The one who ordered.
      */
     private Client client;
+
     /**
      * Indicates if this order from the base (false for clients orders).
      */
@@ -36,26 +41,31 @@ public class Order implements ITableViewable {
      * <i>ТЗ:</i> З якого пункту необхідно зробити переміщення.
      */
     private Place origin;
+
     /**
      * Up to what location it is necessary to make the movement.<br/>
      * <i>ТЗ:</i> До я кого пункту необхідно зробити переміщення.
      */
     private Place destination;
+
     /**
      * A freight of order in tons (tn) that need to be moved.<br/>
      * <i>ТЗ:</i> Вага замовлення.
      */
     private double freightVolume;
+
     /**
      * Time of the order (from the date of the order); in hours.<br/>
      * <i>ТЗ:</i>Час на виконання замовлення (від моменту надходження замовлення).
      */
     private double timeOfDelivery;
+
     /**
      * The maximum value that client can pay for transportation (in UAH).<br/>
      * <i>ТЗ:</i> Максимальна вартість, яку може заплатити клієнт.
      */
     private int maxCost;
+
     /**
      * Penalties for late execution of the order (by default: 100 UAH / 1 hour).<br/>
      * <i>ТЗ:</i> Штрафні санкції за невчасне виконання замовлення (за замовчуванням: 100 грн / 1 год).
@@ -117,11 +127,13 @@ public class Order implements ITableViewable {
      */
     public static List<Order> getClientsOrderSublist(List<Order> orderList) {
         List<Order> list = new ArrayList<>();
+
         for (Order order : orderList) {
             if (!order.isBases) {
                 list.add(order);
             }
         }
+
         return list;
     }
 
@@ -133,11 +145,13 @@ public class Order implements ITableViewable {
      */
     public static List<Order> getBaseOrderSublist(List<Order> orderList) {
         List<Order> list = new ArrayList<>();
+
         for (Order order : orderList) {
             if (order.isBases) {
                 list.add(order);
             }
         }
+
         return list;
     }
 
@@ -147,6 +161,7 @@ public class Order implements ITableViewable {
                 return order;
             }
         }
+
         return null;
     }
 
@@ -164,6 +179,7 @@ public class Order implements ITableViewable {
     public static List<Order> generateRandomOrderList(int clientOrdersCount, int baseOrdersCount) {
         List<Order> orders = generateRandomBaseOrderList(baseOrdersCount);
         orders.addAll(generateRandomClientOrderList(clientOrdersCount));
+
         return orders;
     }
 
@@ -176,14 +192,18 @@ public class Order implements ITableViewable {
     public static List<Order> generateRandomClientOrderList(int count) {
         if (count > 0) {
             List<Order> clientOrders = new ArrayList<>();
+
             for (int i = 0; i < count; i++) {
                 Place origin = Place.getRandomPlaceFromListExclude(MainGUI.placeList, MainGUI.myHeadquarter);
                 Place destination;
-                while ((destination = Place.getRandomPlaceFromListExclude(MainGUI.placeList, origin)).equals(MainGUI.myHeadquarter)); // to avoid myHeadquarter here
+                while ((destination = Place.getRandomPlaceFromListExclude(MainGUI.placeList, origin)).equals(MainGUI.myHeadquarter))
+                    ; // to avoid myHeadquarter here
                 int cost = (int) (Math.round(12.0 * Place.getDistanceBetweenPlaces(origin, destination) / 1000)); // 12 UAH / 1 km
+
                 clientOrders.add(new Order(new Date(System.currentTimeMillis() - 3 * 24 * 60 * 60 * 1000), null, false, origin,
                         destination, 15.0, cost, 10 * 24, defaultFine));
             }
+
             return clientOrders;
         } else {
             return new ArrayList<>();
@@ -199,19 +219,27 @@ public class Order implements ITableViewable {
     public static List<Order> generateRandomBaseOrderList(int count) {
         if (count > 0) {
             List<Order> baseOrders = new ArrayList<>();
+
             for (int i = 0; i < count; i++) {
                 Place origin = MainGUI.myHeadquarter;
                 Place destination = Place.getRandomPlaceFromListExclude(MainGUI.placeList, MainGUI.myHeadquarter);
                 int cost = (int) (Math.round(12.0 * Place.getDistanceBetweenPlaces(origin, destination) / 1000)); // 12 UAH / 1 km
+
                 baseOrders.add(new Order(new Date(System.currentTimeMillis() - 3 * 24 * 60 * 60 * 1000), null, true, origin,
                         destination, 15.0, cost, 10 * 24, defaultFine));
             }
+
             return baseOrders;
         } else {
             return new ArrayList<>();
         }
     }
 
+    /**
+     * Help method for <code>Object[] getTableRowData()</code>.
+     *
+     * @return an array of columns identifiers
+     */
     public static String[] getTableColumnsIdentifiers() {
         return new String[]{"ID", "Timing", "Client", "Origin", "Destination", "Freight Volume", "Time for delivery",
                 "Max Cost", "Fine"};
@@ -238,10 +266,6 @@ public class Order implements ITableViewable {
 
     public int getId() {
         return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public Date getOrderReceiptTime() {

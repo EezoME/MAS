@@ -12,37 +12,46 @@ import java.util.Random;
  * Created by Eezo on 04.11.2016.
  */
 public class Vehicle implements ITableViewable {
+
     private static int vehicleCounter = 0;
 
     private int id;
+
     /**
      * Some unique name for vehicle.
      */
     private String identification;
+
     /**
      * The maximum allowed weight of the load (in tons).
      */
     private double freight;
+
     /**
      * Vehicles average speed (km/hour).
      */
     private int averageSpeed;
+
     /**
-     * Time than vehicle needs for loading the freight (hrs).
+     * Time that vehicle needs for loading the freight (hrs).
      */
     private double timeForLoad;
+
     /**
-     * Time than vehicle needs for unloading the freight (hrs).
+     * Time that vehicle needs for unloading the freight (hrs).
      */
     private double timeForUnload;
+
     /**
      * Cost of transportation of cargo for 1 km (UAH).
      */
     private double transportationCost;
+
     /**
      * Current vehicle's location.
      */
     private String currentLocation;
+
     /**
      * Current vehicle's state.
      */
@@ -55,14 +64,21 @@ public class Vehicle implements ITableViewable {
      * On which route is.
      */
     private Route currentRoute;
+
     /**
      * How many kilometers vehicle already passed.
      */
     private double routeCompletedLength;
+
     /**
      * How long vehicle is on route (hrs).
      */
     private double timeOnRoute;
+
+    /**
+     * Current number of freight (tons).
+     */
+    private double currentFreight;
 
 
     Vehicle() {
@@ -71,12 +87,12 @@ public class Vehicle implements ITableViewable {
 
     public Vehicle(String identification, double freight, int averageSpeed, double timeForLoad, double timeForUnload, double transportationCost) {
         this(identification, freight, averageSpeed, timeForLoad, timeForUnload, transportationCost,
-                MainGUI.myHeadquarter.getGmapsAddress(), State.FREE, null, 0.0, 0.0);
+                MainGUI.myHeadquarter.getGmapsAddress(), State.FREE, null, 0.0, 0.0, 0.0);
     }
 
     public Vehicle(String identification, double freight, int averageSpeed, double timeForLoad, double timeForUnload,
                    double transportationCost, String currentLocation, State state, Route currentRoute,
-                   double routeCompletedLength, double timeOnRoute) {
+                   double routeCompletedLength, double timeOnRoute, double currentFreight) {
         this.id = vehicleCounter++;
         this.identification = identification;
         this.freight = freight;
@@ -89,6 +105,7 @@ public class Vehicle implements ITableViewable {
         this.currentRoute = currentRoute;
         this.routeCompletedLength = routeCompletedLength;
         this.timeOnRoute = timeOnRoute;
+        this.currentFreight = currentFreight;
     }
 
 
@@ -99,9 +116,11 @@ public class Vehicle implements ITableViewable {
      */
     public static List<Vehicle> generateDefaultVehiclesList() {
         List<Vehicle> vehicles = new ArrayList<>();
+
         for (int i = 0; i < 5; i++) {
             vehicles.add(new Vehicle("Vehicle " + (i + 1), 25.0d, 70, 3.0d, 2.5d, 4.0d));
         }
+
         return vehicles;
     }
 
@@ -109,6 +128,11 @@ public class Vehicle implements ITableViewable {
         return new Vehicle("V" + new Random().nextInt(), 0.0d, 0, 0.0d, 0.0d, 0.0d);
     }
 
+    /**
+     * Help method for <code>Object[] getTableRowData()</code>.
+     *
+     * @return an array of columns identifiers
+     */
     public static String[] getTableColumnsIdentifiers() {
         return new String[]{"№", "Identification", "Freight", "Average Speed", "Time For Load", "Time For Unload",
                 "Cost", "Location", "State"};
@@ -134,7 +158,6 @@ public class Vehicle implements ITableViewable {
     private String getReadableCost() {
         return transportationCost + " UAH";
     }
-
 
 
     public String getIdentification() {
@@ -226,11 +249,26 @@ public class Vehicle implements ITableViewable {
     }
 
 
+    /**
+     * If it's possible, increases current freight of this vehicle.
+     *
+     * @param freight additional freight (tons)
+     * @return <b>true</b> if addition was completed successfully, <b>false</b> - otherwise
+     */
+    public boolean addMoreFreight(double freight) {
+        if (this.currentFreight + freight > this.freight) {
+            return false;
+        }
+
+        this.currentFreight += freight;
+
+        return true;
+    }
 
     /**
-     * Vehicles possible states.
+     * Vehicle possible states.
      */
-    enum State {
+    public enum State {
         FREE {
             @Override
             public String getReadableValue() {

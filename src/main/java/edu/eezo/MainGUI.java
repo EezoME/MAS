@@ -1,6 +1,7 @@
 package edu.eezo;
 
 import edu.eezo.data.*;
+import edu.eezo.saving.Route;
 import edu.eezo.saving.SavingAlgorithm;
 import edu.eezo.saving.SavingTable;
 
@@ -38,36 +39,45 @@ public class MainGUI extends JFrame {
     private JButton buttonBuildLocalRoutes;
     private JButton buttonData;
     private JButton buttonNextStep;
+    private JTextArea textArea1;
 
     /**
-     * For date parsing.
+     * Locale for date parsing.
      */
     public static Locale locale = Locale.ENGLISH;
+
     /**
      * A list of locations (by default, Ukrainian cities).
      */
     public static java.util.List<Place> placeList;
+
     /**
-     * Distances between places (to avoid multiple requests to GMaps service on each start).
+     * Distances between places (to avoid multiple requests to GoogleMaps service on each start).
      */
     public static long[][] distancesMatrix;
+
     /**
      * A list of clients.
      */
     public static java.util.List<Client> clientList;
+
     /**
      * Order lists (include clients and bases orders).
      */
     public static java.util.List<Order> orderList;
+
     /**
      * A list of company vehicles (trucks).
      */
     public static java.util.List<Vehicle> vehicleList;
+
     /**
      * Current headquarter location (for saving algorithm).
      * By default sets to "Николаев".
      */
     public static Place myHeadquarter;
+
+    private SavingAlgorithm savingAlgorithm;
 
 
     public MainGUI() {
@@ -96,6 +106,7 @@ public class MainGUI extends JFrame {
                 refreshOrdersTables();
             }
         });
+
         buttonEditClientOrder.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -103,11 +114,14 @@ public class MainGUI extends JFrame {
                     JOptionPane.showMessageDialog(null, "Select an order in the table");
                     return;
                 }
-                runOrderGUI(Order.getOrderById(orderList, (int) tableClientOrdersList.getValueAt(tableClientOrdersList.getSelectedRow(),
-                        0)));
+
+                runOrderGUI(Order.getOrderById(orderList, (int)
+                        tableClientOrdersList.getValueAt(tableClientOrdersList.getSelectedRow(), 0)));
+
                 refreshOrdersTables();
             }
         });
+
         buttonDeleteClientOrder.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -115,10 +129,12 @@ public class MainGUI extends JFrame {
                     JOptionPane.showMessageDialog(null, "Select an order in the table");
                     return;
                 }
+
                 if (JOptionPane.showConfirmDialog(null, "Are you sure you want to delete this order?") == JOptionPane.OK_OPTION) {
                     orderList.remove(Order.getOrderById(orderList, (int) tableClientOrdersList.getValueAt(tableClientOrdersList.getSelectedRow(),
                             0)));
                 }
+
                 fillTableWithData(tableClientOrdersList, Order.getClientsOrderSublist(orderList));
             }
         });
@@ -132,6 +148,7 @@ public class MainGUI extends JFrame {
                 refreshOrdersTables();
             }
         });
+
         buttonEditBaseOrder.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -139,11 +156,14 @@ public class MainGUI extends JFrame {
                     JOptionPane.showMessageDialog(null, "Select an order in the table");
                     return;
                 }
-                runOrderGUI(Order.getOrderById(orderList, (int) tableBasesOrderList.getValueAt(tableBasesOrderList.getSelectedRow(),
-                        0)));
+
+                runOrderGUI(Order.getOrderById(orderList,
+                        (int) tableBasesOrderList.getValueAt(tableBasesOrderList.getSelectedRow(), 0)));
+
                 refreshOrdersTables();
             }
         });
+
         buttonDeleteBaseOrder.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -151,10 +171,12 @@ public class MainGUI extends JFrame {
                     JOptionPane.showMessageDialog(null, "Select an order in the table");
                     return;
                 }
+
                 if (JOptionPane.showConfirmDialog(null, "Are you sure you want to delete this order?") == JOptionPane.OK_OPTION) {
-                    orderList.remove(Order.getOrderById(orderList, (int) tableBasesOrderList.getValueAt(tableBasesOrderList.getSelectedRow(),
-                            0)));
+                    orderList.remove(Order.getOrderById(orderList,
+                            (int) tableBasesOrderList.getValueAt(tableBasesOrderList.getSelectedRow(), 0)));
                 }
+
                 fillTableWithData(tableBasesOrderList, Order.getBaseOrderSublist(orderList));
             }
         });
@@ -168,6 +190,7 @@ public class MainGUI extends JFrame {
                 fillTableWithData(tableVehiclesList, vehicleList);
             }
         });
+
         buttonEditVehicle.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -175,10 +198,12 @@ public class MainGUI extends JFrame {
                     JOptionPane.showMessageDialog(null, "Select a vehicle in the table");
                     return;
                 }
+
                 runVehicleGUI(vehicleList.get(tableVehiclesList.getSelectedRow()));
                 fillTableWithData(tableVehiclesList, vehicleList);
             }
         });
+
         buttonRemoveVehicle.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -186,9 +211,11 @@ public class MainGUI extends JFrame {
                     JOptionPane.showMessageDialog(null, "Select a vehicle in the table");
                     return;
                 }
+
                 if (JOptionPane.showConfirmDialog(null, "Are you sure you want to delete this order?") == JOptionPane.OK_OPTION) {
                     vehicleList.remove(tableVehiclesList.getSelectedRow());
                 }
+
                 fillTableWithData(tableVehiclesList, vehicleList);
             }
         });
@@ -202,12 +229,14 @@ public class MainGUI extends JFrame {
                 fillTableWithData(tableBasesOrderList, Order.getBaseOrderSublist(orderList));
             }
         });
+
         buttonNextStep.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (!preSavingChecks()) {
                     return;
                 }
+
                 tabbedPane1.setSelectedIndex(1);
             }
         });
@@ -223,10 +252,35 @@ public class MainGUI extends JFrame {
                 if (!preSavingChecks()) {
                     return;
                 }
-                SavingAlgorithm savingAlgorithm = new SavingAlgorithm(orderList);
+
+                savingAlgorithm = new SavingAlgorithm(orderList);
+
                 savingAlgorithm.runAlgorithm();
                 fillSavingTable(savingAlgorithm.getSavingTable().getTableRowData());
                 labelGlobalRoute.setText(savingAlgorithm.getGlobalRoute().getRouteIds());
+            }
+        });
+
+        buttonBuildLocalRoutes.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (savingAlgorithm == null) {
+                    JOptionPane.showMessageDialog(null, "Run algorithm first!");
+                    return;
+                }
+
+                List<Route.LocalRoute> localRoutes = savingAlgorithm.buildLocalRoutes(vehicleList);
+
+                for (Route.LocalRoute localRoute : localRoutes) {
+                    textArea1.append("Route: ");
+
+                    for (Place place : localRoute.getLocalRoute()) {
+                        textArea1.append(place.getId() + " - ");
+                    }
+
+                    textArea1.replaceRange("", textArea1.getText().length() - 3, textArea1.getText().length());
+                    textArea1.append("\n");
+                }
             }
         });
     }
@@ -246,6 +300,7 @@ public class MainGUI extends JFrame {
         placeList = Place.generateDefaultPlaces();
         distancesMatrix = Place.getDistancesMatrix();
         myHeadquarter = Place.getPlaceByTitle(placeList, "Николаев"); // ALWAYS ABOVE vehicleList AND orderList INITIALIZATION, OTHERWISE - NullPointerException
+
         clientList = new ArrayList<>();
         orderList = Order.generateRandomOrderList(5, 5);
         vehicleList = Vehicle.generateDefaultVehiclesList();
@@ -288,14 +343,22 @@ public class MainGUI extends JFrame {
     private void fillTableWithData(JTable table, List<? extends ITableViewable> list) {
         removeRows(table);
         DefaultTableModel model = (DefaultTableModel) table.getModel();
+
         for (ITableViewable element : list) {
             model.addRow(element.getTableRowData());
         }
     }
 
+    /**
+     * Fills saving table with objects.
+     * Cannot use <code>fillTableWithData</code> because of different parameter
+     *
+     * @param rows an array of rows with data (two-dimensional)
+     */
     private void fillSavingTable(Object[][] rows) {
         removeRows(tableSaving);
         DefaultTableModel model = (DefaultTableModel) tableSaving.getModel();
+
         for (Object[] row : rows) {
             model.addRow(row);
         }
@@ -303,6 +366,7 @@ public class MainGUI extends JFrame {
 
     private void removeRows(JTable table) {
         DefaultTableModel model = (DefaultTableModel) table.getModel();
+
         while (model.getRowCount() > 0) {
             model.removeRow(0);
         }
@@ -318,6 +382,7 @@ public class MainGUI extends JFrame {
     public static Date parseStringDate(String date) {
         String pattern = "EEE MMM d HH:mm:ss zzz yyyy";
         SimpleDateFormat parser = new SimpleDateFormat(pattern, locale);
+
         try {
             return parser.parse(date);
         } catch (ParseException e) {
@@ -343,10 +408,12 @@ public class MainGUI extends JFrame {
             JOptionPane.showMessageDialog(null, "Order List is empty. Saving algorithm cannot be run.");
             return false;
         }
+
         if (vehicleList.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Vehicles List is empty. Saving algorithm cannot be run.");
             return false;
         }
+
         return true;
     }
 }

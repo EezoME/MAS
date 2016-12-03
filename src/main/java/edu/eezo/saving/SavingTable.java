@@ -8,14 +8,21 @@ import edu.eezo.data.Place;
 import java.util.List;
 
 /**
+ * Represents current saving table data in ne place.
+ * <p>
  * Created by Eezo on 12.11.2016.
  */
 public class SavingTable implements ITableViewable {
+
+    // client orders data
     private Order[] clientOrderList;
     private long[] clientSavingDistances;
+
+    // base orders data
     private Order[] baseOrderList;
     private long[] baseSavingDistances;
 
+    // all client and base orders data
     private Order[] orderList;
     private long[] savingDistances;
 
@@ -45,10 +52,12 @@ public class SavingTable implements ITableViewable {
         for (int i = 0; i < savingDistances.length; i++) {
             savingDistances[i] = calculateSavingDistance(this.orderList[i]);
         }
+
         this.clientSavingDistances = new long[clientOrders.size()];
         for (int i = 0; i < clientSavingDistances.length; i++) {
             clientSavingDistances[i] = calculateSavingDistance(this.clientOrderList[i]);
         }
+
         this.baseSavingDistances = new long[baseOrders.size()];
         for (int i = 0; i < baseSavingDistances.length; i++) {
             baseSavingDistances[i] = calculateSavingDistance(this.baseOrderList[i]);
@@ -61,14 +70,17 @@ public class SavingTable implements ITableViewable {
     void sort() {
         for (int i = 0; i < clientSavingDistances.length - 1; i++) {
             boolean swapped = false;
+
             for (int j = 0; j < clientSavingDistances.length - i - 1; j++) {
                 if (clientSavingDistances[j] < clientSavingDistances[j + 1]) { // descending
                     long tmp = clientSavingDistances[j];
                     clientSavingDistances[j] = clientSavingDistances[j + 1];
                     clientSavingDistances[j + 1] = tmp;
+
                     Order tmp2 = clientOrderList[j];
                     clientOrderList[j] = clientOrderList[j + 1];
                     clientOrderList[j + 1] = tmp2;
+
                     swapped = true;
                 }
             }
@@ -96,6 +108,7 @@ public class SavingTable implements ITableViewable {
         long Sod = Place.getDistanceBetweenPlaces(order.getOrigin(), order.getDestination());
         long Soh = Place.getDistanceBetweenPlaces(order.getOrigin(), MainGUI.myHeadquarter);
         long Sdh = Place.getDistanceBetweenPlaces(order.getDestination(), MainGUI.myHeadquarter);
+
         return (Soh + Sdh - Sod);
     }
 
@@ -115,6 +128,11 @@ public class SavingTable implements ITableViewable {
         return clientSavingDistances;
     }
 
+    /**
+     * Help method for <code>Object[] getTableRowData()</code>.
+     *
+     * @return an array of columns identifiers
+     */
     public static String[] getTableColumnsIdentifiers() {
         return new String[]{"Order #", "Origin", "Destination", "Saving Distance"};
     }
@@ -122,9 +140,11 @@ public class SavingTable implements ITableViewable {
     @Override
     public Object[][] getTableRowData() {
         Object[][] tableData = new Object[clientOrderList.length][4];
+
         for (int i = 0; i < tableData.length; i++) {
             tableData[i] = new Object[]{clientOrderList[i].getId(), clientOrderList[i].getOrigin(), clientOrderList[i].getDestination(), clientSavingDistances[i]};
         }
+
         return tableData;
     }
 }

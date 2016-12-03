@@ -1,5 +1,8 @@
 package edu.eezo.data;
 
+import edu.eezo.MainGUI;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -7,15 +10,26 @@ import java.util.List;
  * Created by Eezo on 02.11.2016.
  */
 public class Client {
+    /**
+     * Client name.
+     */
     private String name;
-    private List<Order> storageList;
-    private List<Order> orderList;
 
-    public Client(String name, List<Order> storageList, List<Order> orderList) {
+    /**
+     * Client's list of base orders.
+     */
+    private List<Order> baseOrderList;
+
+    /**
+     * Client's list of it's own orders.
+     */
+    private List<Order> clientOrderList;
+
+    public Client(String name, List<Order> baseOrderList, List<Order> clientOrderList) {
         this.name = name;
-        this.storageList = storageList;
-        this.orderList = orderList;
-        // if NullPointerException -> new ArrayList()
+        this.baseOrderList = baseOrderList;
+        this.clientOrderList = clientOrderList;
+        // if NullPointerException -> add new ArrayList()
     }
 
     public static Client getClientByName(List<Client> clientList, String name) {
@@ -24,25 +38,31 @@ public class Client {
                 return client;
             }
         }
+
         return null;
     }
 
     /* Generators */
-    /* *
-     * Generates 5 default customers with headquarters in "Николаев".
+
+    /**
+     * Generates default customers with no orders.
+     *
+     * @param number a number of customers to generate
      * @return a list of customers
-     * /
-    public static List<Client> generateDefaultCustomers() {
+     */
+    public static List<Client> generateDefaultCustomers(int number) {
         List<Client> customers = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            customers.add(new Client("Default Client " + (i + 1), Place.getPlaceByTitle(MainGUI.placeList, "Николаев")));
+
+        for (int i = 0; i < number; i++) {
+            customers.add(new Client("Default Client " + (i + 1), null, null));
         }
+
         return customers;
     }
 
     public static Client getRandomCustomerFromList(List<Client> clientList) {
         return clientList.get(MainGUI.getRandomNumberInRange(0, MainGUI.clientList.size()));
-    }*/
+    }
 
     @Override
     public String toString() {

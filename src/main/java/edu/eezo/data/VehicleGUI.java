@@ -26,6 +26,7 @@ public class VehicleGUI extends JDialog {
         setTitle("Vehicle GUI -- MAS");
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
+
         if (vehicle == null) {
             labelTop.setText("New Transportation Unit");
         } else {
@@ -76,6 +77,7 @@ public class VehicleGUI extends JDialog {
         if (vehicle == null) {
             return;
         }
+
         textFieldIdentification.setText(vehicle.getIdentification());
         textFieldMaxFreight.setText(vehicle.getFreight() + "");
         textFieldAverageSpeed.setText(vehicle.getAverageSpeed() + "");
@@ -90,9 +92,11 @@ public class VehicleGUI extends JDialog {
         if (!checkRequiredFields()) {
             return;
         }
+
         if (vehicle == null) {
             vehicle = new Vehicle();
         }
+
         vehicle.setIdentification(textFieldIdentification.getText());
         vehicle.setFreight(Double.parseDouble(textFieldMaxFreight.getText()));
         vehicle.setAverageSpeed(Integer.parseInt(textFieldAverageSpeed.getText()));

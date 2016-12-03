@@ -1,14 +1,17 @@
 package edu.eezo.saving;
 
-
 import edu.eezo.data.Order;
+import edu.eezo.data.Vehicle;
 
 import java.util.List;
 
 /**
+ * Saving algorithm utils.
+ * <p>
  * Created by Eezo on 06.11.2016.
  */
 public class SavingAlgorithm {
+
     private SavingTable savingTable;
     private Route globalRoute;
 
@@ -22,8 +25,10 @@ public class SavingAlgorithm {
         // build global route
         globalRoute = new Route();
         globalRoute.buildGlobalRoute(savingTable);
+    }
 
-        // build local routes
+    public List<Route.LocalRoute> buildLocalRoutes(List<Vehicle> vehicleList) {
+        return globalRoute.buildLocalRoutes(savingTable, vehicleList);
     }
 
     public SavingTable getSavingTable() {

@@ -1,6 +1,5 @@
-package edu.eezo.gmap;/**
- * Created by Eezo on 25.10.2016.
- */
+package edu.eezo.gmap;
+
 import com.teamdev.jxbrowser.chromium.Browser;
 import com.teamdev.jxbrowser.chromium.BrowserCore;
 import com.teamdev.jxbrowser.chromium.internal.Environment;

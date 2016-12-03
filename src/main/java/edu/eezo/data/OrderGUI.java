@@ -28,6 +28,7 @@ public class OrderGUI extends JDialog {
         setTitle("Order GUI -- MAS");
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
+
         if (order == null) {
             labelTop.setText("New Order");
         } else {
@@ -89,6 +90,7 @@ public class OrderGUI extends JDialog {
         if (order == null) {
             return;
         }
+
         textFieldReceiptTime.setText(order.getOrderReceiptTime().toString());
         comboBoxClient.setSelectedItem(order.getClient());
         checkBoxIsBases.setSelected(order.isBases());
@@ -109,33 +111,40 @@ public class OrderGUI extends JDialog {
         if (!checkRequiredFields()) {
             return;
         }
+
         if (!checkOptionalFields()) {
             return;
         }
+
         if (order == null) {
             order = new Order();
         }
+
         if (textFieldReceiptTime.getText().isEmpty()) {
             order.setOrderReceiptTime(new Date(System.currentTimeMillis()));
         } else {
             Date date = MainGUI.parseStringDate(textFieldReceiptTime.getText());
+
             if (date == null) {
                 return;
             } else {
                 order.setOrderReceiptTime(date);
             }
         }
+
         order.setClient((Client) comboBoxClient.getSelectedItem());
         order.setBases(checkBoxIsBases.isSelected());
         order.setOrigin((Place) comboBoxOrigin.getSelectedItem());
         order.setDestination((Place) comboBoxDestination.getSelectedItem());
         order.setFreightVolume(Double.parseDouble(textFieldFreight.getText()));
         order.setMaxCost(Integer.parseInt(textFieldMaxCost.getText()));
+
         if (textFieldDeliveryDuration.getText().isEmpty()) {
             order.setTimeOfDelivery(48.0);
         } else {
             order.setTimeOfDelivery(Double.parseDouble(textFieldDeliveryDuration.getText()));
         }
+
         if (textFieldFine.getText().isEmpty()) {
             order.setFine(Order.defaultFine);
         } else {
@@ -161,6 +170,7 @@ public class OrderGUI extends JDialog {
             JOptionPane.showMessageDialog(null, "Specify the freight.");
             return false;
         }
+
         try {
             if (Double.parseDouble(textFieldFreight.getText()) <= 0) {
                 JOptionPane.showMessageDialog(null, "Freight value must be grater than 0.");
@@ -175,6 +185,7 @@ public class OrderGUI extends JDialog {
             JOptionPane.showMessageDialog(null, "Specify the cost.");
             return false;
         }
+
         try {
             if (Integer.parseInt(textFieldMaxCost.getText()) <= 0) {
                 JOptionPane.showMessageDialog(null, "Max cost value must be grater than 0.");
@@ -197,6 +208,7 @@ public class OrderGUI extends JDialog {
         if (textFieldDeliveryDuration.getText().isEmpty()) {
             System.out.println("INFO: You didn't specified delivery duration. It will be set to default (48 hrs).");
         }
+
         if (textFieldFine.getText().isEmpty()) {
             System.out.println("INFO: You didn't specified fine. It will be set to default (100 UAH/hour).");
         }
