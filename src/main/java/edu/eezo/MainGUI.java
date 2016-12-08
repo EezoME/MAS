@@ -40,6 +40,8 @@ public class MainGUI extends JFrame {
     private JButton buttonData;
     private JButton buttonNextStep;
     private JTextArea textArea1;
+    private JLabel labelTime;
+    private JLabel labelDate;
 
     /**
      * Locale for date parsing.
@@ -78,6 +80,8 @@ public class MainGUI extends JFrame {
     public static Place myHeadquarter;
 
     private SavingAlgorithm savingAlgorithm;
+
+    protected TimerThread timerThread;
 
 
     public MainGUI() {
@@ -283,6 +287,21 @@ public class MainGUI extends JFrame {
                 }
             }
         });
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent event) {
+                exitProcedure();
+            }
+        });
+
+        timerThread = new TimerThread(labelDate, labelTime);
+        timerThread.start();
+    }
+
+    public void exitProcedure() {
+        timerThread.setRunning(false);
+        System.exit(0);
     }
 
     public static void main(String[] args) {
@@ -415,5 +434,17 @@ public class MainGUI extends JFrame {
         }
 
         return true;
+    }
+
+    private void runTime() {
+        try {
+            while (true) {
+                long time = System.currentTimeMillis();
+                labelTime.setText("Time: " + time);
+                Thread.sleep(1000);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
