@@ -1,4 +1,4 @@
-package edu.eezo;
+package edu.eezo.thread;
 
 import javax.swing.*;
 import java.text.SimpleDateFormat;
@@ -41,6 +41,7 @@ public class TimerThread extends Thread {
             try {
                 Thread.sleep(1000L);
             } catch (InterruptedException e) {
+                JOptionPane.showMessageDialog(null, "Timer Timing Error.");
             }
         }
     }

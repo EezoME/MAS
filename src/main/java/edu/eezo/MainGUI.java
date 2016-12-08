@@ -4,6 +4,7 @@ import edu.eezo.data.*;
 import edu.eezo.saving.Route;
 import edu.eezo.saving.SavingAlgorithm;
 import edu.eezo.saving.SavingTable;
+import edu.eezo.thread.*;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -42,6 +43,8 @@ public class MainGUI extends JFrame {
     private JTextArea textArea1;
     private JLabel labelTime;
     private JLabel labelDate;
+    private JButton buttonStartMAS;
+    private JTable tableAgentsStatus;
 
     /**
      * Locale for date parsing.
@@ -81,7 +84,11 @@ public class MainGUI extends JFrame {
 
     private SavingAlgorithm savingAlgorithm;
 
-    protected TimerThread timerThread;
+    private List<Route.LocalRoute> localRoutes;
+
+    private TimerThread timerThread;
+
+    private AgentActual agentActual;
 
 
     public MainGUI() {
@@ -260,7 +267,7 @@ public class MainGUI extends JFrame {
                 savingAlgorithm = new SavingAlgorithm(orderList);
 
                 savingAlgorithm.runAlgorithm();
-                fillSavingTable(savingAlgorithm.getSavingTable().getTableRowData());
+                fillTableWithDataArrays(tableSaving, savingAlgorithm.getSavingTable().getTableRowData());
                 labelGlobalRoute.setText(savingAlgorithm.getGlobalRoute().getRouteIds());
             }
         });
@@ -273,7 +280,7 @@ public class MainGUI extends JFrame {
                     return;
                 }
 
-                List<Route.LocalRoute> localRoutes = savingAlgorithm.buildLocalRoutes(vehicleList);
+                localRoutes = savingAlgorithm.buildLocalRoutes(vehicleList);
 
                 for (Route.LocalRoute localRoute : localRoutes) {
                     textArea1.append("Route: ");
@@ -297,10 +304,22 @@ public class MainGUI extends JFrame {
 
         timerThread = new TimerThread(labelDate, labelTime);
         timerThread.start();
+
+        buttonStartMAS.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                agentActual = new AgentActual(localRoutes, tableAgentsStatus);
+                fillTableWithDataArrays(tableAgentsStatus, agentActual.getTableRowData());
+            }
+        });
     }
 
+    /**
+     * Sets flag for stopping time thread.
+     */
     public void exitProcedure() {
         timerThread.setRunning(false);
+        agentActual.stopMAS();
         System.exit(0);
     }
 
@@ -346,6 +365,11 @@ public class MainGUI extends JFrame {
         model4.setColumnIdentifiers(SavingTable.getTableColumnsIdentifiers());
         model4.setRowCount(0);
 
+        // AGENT TABLE INITIALIZATION
+        DefaultTableModel model5 = (DefaultTableModel) tableAgentsStatus.getModel();
+        model5.setColumnIdentifiers(AgentActual.getTableColumnsIdentifiers());
+        model5.setRowCount(0);
+
         fillTableWithData(tableClientOrdersList, Order.getClientsOrderSublist(orderList));
         fillTableWithData(tableBasesOrderList, Order.getBaseOrderSublist(orderList));
         fillTableWithData(tableVehiclesList, vehicleList);
@@ -369,14 +393,14 @@ public class MainGUI extends JFrame {
     }
 
     /**
-     * Fills saving table with objects.
+     * Fills table with objects.
      * Cannot use <code>fillTableWithData</code> because of different parameter
      *
      * @param rows an array of rows with data (two-dimensional)
      */
-    private void fillSavingTable(Object[][] rows) {
-        removeRows(tableSaving);
-        DefaultTableModel model = (DefaultTableModel) tableSaving.getModel();
+    private void fillTableWithDataArrays(JTable table, Object[][] rows) {
+        removeRows(table);
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
 
         for (Object[] row : rows) {
             model.addRow(row);
@@ -436,15 +460,4 @@ public class MainGUI extends JFrame {
         return true;
     }
 
-    private void runTime() {
-        try {
-            while (true) {
-                long time = System.currentTimeMillis();
-                labelTime.setText("Time: " + time);
-                Thread.sleep(1000);
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
 }

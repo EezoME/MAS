@@ -63,7 +63,7 @@ public class Vehicle implements ITableViewable {
     /**
      * On which route is.
      */
-    private Route currentRoute;
+    private String currentRoute;
 
     /**
      * How many kilometers vehicle already passed.
@@ -91,7 +91,7 @@ public class Vehicle implements ITableViewable {
     }
 
     public Vehicle(String identification, double freight, int averageSpeed, double timeForLoad, double timeForUnload,
-                   double transportationCost, String currentLocation, State state, Route currentRoute,
+                   double transportationCost, String currentLocation, State state, String currentRoute,
                    double routeCompletedLength, double timeOnRoute, double currentFreight) {
         this.id = vehicleCounter++;
         this.identification = identification;
@@ -141,6 +141,10 @@ public class Vehicle implements ITableViewable {
     public Object[] getTableRowData() {
         return new Object[]{id, identification, getReadableFreight(), getReadableSpeed(), getReadableTime(timeForLoad),
                 getReadableTime(timeForUnload), getReadableCost(), currentLocation, state.getReadableValue()};
+    }
+
+    public Object[] getTableRowActualData() {
+        return new Object[]{id, getState(), getCurrentRoute(), getRouteCompletedLength(), getTimeOnRoute(), getCurrentFreight()};
     }
 
     private String getReadableFreight() {
@@ -224,11 +228,11 @@ public class Vehicle implements ITableViewable {
         this.state = state;
     }
 
-    public Route getCurrentRoute() {
+    public String getCurrentRoute() {
         return currentRoute;
     }
 
-    public void setCurrentRoute(Route currentRoute) {
+    public void setCurrentRoute(String currentRoute) {
         this.currentRoute = currentRoute;
     }
 
@@ -248,6 +252,13 @@ public class Vehicle implements ITableViewable {
         this.timeOnRoute = timeOnRoute;
     }
 
+    public double getCurrentFreight() {
+        return currentFreight;
+    }
+
+    public void setCurrentFreight(double currentFreight) {
+        this.currentFreight = currentFreight;
+    }
 
     /**
      * If it's possible, increases current freight of this vehicle.
