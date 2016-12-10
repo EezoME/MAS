@@ -2,7 +2,7 @@ package edu.eezo.thread;
 
 import edu.eezo.MainGUI;
 import edu.eezo.data.ITableViewable;
-import edu.eezo.saving.Route;
+import edu.eezo.saving.LocalRoute;
 
 import javax.swing.*;
 import java.util.List;
@@ -14,12 +14,15 @@ public class AgentActual implements ITableViewable {
 
     private AgentThread agentThread;
 
-    public AgentActual(List<Route.LocalRoute> localRoutes, JTable table){
+    public AgentActual(List<LocalRoute> localRoutes, JTable table) {
         agentThread = new AgentThread(MainGUI.vehicleList, localRoutes, table, this);
         agentThread.start();
     }
 
-    public void stopMAS(){
+    /**
+     * Sends signal to stop multi-agent thread.
+     */
+    public void stopMAS() {
         agentThread.setRunning(false);
     }
 

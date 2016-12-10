@@ -1,8 +1,8 @@
 package edu.eezo;
 
 import edu.eezo.data.*;
+import edu.eezo.saving.LocalRoute;
 import edu.eezo.saving.Route;
-import edu.eezo.saving.SavingAlgorithm;
 import edu.eezo.saving.SavingTable;
 import edu.eezo.thread.*;
 
@@ -45,6 +45,7 @@ public class MainGUI extends JFrame {
     private JLabel labelDate;
     private JButton buttonStartMAS;
     private JTable tableAgentsStatus;
+    private JButton buttonStopAgents;
 
     /**
      * Locale for date parsing.
@@ -82,9 +83,9 @@ public class MainGUI extends JFrame {
      */
     public static Place myHeadquarter;
 
-    private SavingAlgorithm savingAlgorithm;
+    private Route globalRoute;
 
-    private List<Route.LocalRoute> localRoutes;
+    private List<LocalRoute> localRoutes;
 
     private TimerThread timerThread;
 
@@ -244,7 +245,7 @@ public class MainGUI extends JFrame {
         buttonNextStep.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (!preSavingChecks()) {
+                if (!preSavingAlgorithmChecks()) {
                     return;
                 }
 
@@ -260,42 +261,41 @@ public class MainGUI extends JFrame {
         buttonRunAlgorithm.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (!preSavingChecks()) {
+                if (!preSavingAlgorithmChecks()) {
                     return;
                 }
 
-                savingAlgorithm = new SavingAlgorithm(orderList);
+                globalRoute = new Route(myHeadquarter);
+                localRoutes = null;
 
-                savingAlgorithm.runAlgorithm();
-                fillTableWithDataArrays(tableSaving, savingAlgorithm.getSavingTable().getTableRowData());
-                labelGlobalRoute.setText(savingAlgorithm.getGlobalRoute().getRouteIds());
+                globalRoute.makeGlobalRoute(Order.getClientsOrderSublist(orderList));
+                globalRoute.finalizeRoute();
+
+                fillTableWithDataArrays(tableSaving, globalRoute.getTableData());
+                labelGlobalRoute.setText(globalRoute.getRoutePathInId());
             }
         });
 
         buttonBuildLocalRoutes.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (savingAlgorithm == null) {
+                if (globalRoute == null) {
                     JOptionPane.showMessageDialog(null, "Run algorithm first!");
                     return;
                 }
 
-                localRoutes = savingAlgorithm.buildLocalRoutes(vehicleList);
+                localRoutes = globalRoute.makeLocalRoutes(vehicleList);
 
-                for (Route.LocalRoute localRoute : localRoutes) {
-                    textArea1.append("Route: ");
+                textArea1.setText("");
 
-                    for (Place place : localRoute.getLocalRoute()) {
-                        textArea1.append(place.getId() + " - ");
-                    }
-
-                    textArea1.replaceRange("", textArea1.getText().length() - 3, textArea1.getText().length());
-                    textArea1.append("\n");
+                for (LocalRoute localRoute : localRoutes) {
+                    localRoute.finalizeRoute(myHeadquarter);
+                    textArea1.append("Route: " + localRoute.getRoutePathInId() + "\n");
                 }
             }
         });
 
-        addWindowListener(new WindowAdapter() {
+        this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent event) {
                 exitProcedure();
@@ -310,6 +310,14 @@ public class MainGUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 agentActual = new AgentActual(localRoutes, tableAgentsStatus);
                 fillTableWithDataArrays(tableAgentsStatus, agentActual.getTableRowData());
+
+                tabbedPane1.setSelectedIndex(2);
+            }
+        });
+        buttonStopAgents.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                agentActual.stopMAS();
             }
         });
     }
@@ -319,7 +327,7 @@ public class MainGUI extends JFrame {
      */
     public void exitProcedure() {
         timerThread.setRunning(false);
-        agentActual.stopMAS();
+        if (agentActual != null) agentActual.stopMAS();
         System.exit(0);
     }
 
@@ -446,7 +454,7 @@ public class MainGUI extends JFrame {
         VehicleGUI.main(vehicle);
     }
 
-    private boolean preSavingChecks() {
+    private boolean preSavingAlgorithmChecks() {
         if (orderList.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Order List is empty. Saving algorithm cannot be run.");
             return false;

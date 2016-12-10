@@ -1,14 +1,14 @@
 package edu.eezo.thread;
 
-import edu.eezo.MainGUI;
 import edu.eezo.data.Vehicle;
-import edu.eezo.saving.Route;
+import edu.eezo.saving.LocalRoute;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.util.List;
 
 /**
+ * Run and update tools for agent.
  * Created by Eezo on 08.12.2016.
  */
 public class AgentThread extends Thread {
@@ -21,15 +21,15 @@ public class AgentThread extends Thread {
 
     private AgentActual agentActual;
 
-    public AgentThread(List<Vehicle> vehicleList, List<Route.LocalRoute> localRoutes, JTable table, AgentActual agentActual) {
+    public AgentThread(List<Vehicle> vehicleList, List<LocalRoute> localRoutes, JTable table, AgentActual agentActual) {
         this.tableAgentsStatus = table;
         this.agentActual = agentActual;
         this.vehicleList = vehicleList;
         for (int i = 0; i < localRoutes.size(); i++) {
-            if (i < vehicleList.size()){
+            if (i < vehicleList.size()) {
                 vehicleList.get(i).setState(Vehicle.State.ON_THE_ROUTE);
-                vehicleList.get(i).setCurrentRoute(MainGUI.orderList.get(i).getOrigin() + " - " +
-                        MainGUI.orderList.get(i).getDestination());
+                vehicleList.get(i).setCurrentRoute(localRoutes.get(i).getRouteOrders().get(0).getOrigin() + " - " +
+                        localRoutes.get(i).getRouteOrders().get(localRoutes.get(i).getRouteOrders().size() - 1).getDestination());
                 vehicleList.get(i).setRouteCompletedLength(0.0d);
                 vehicleList.get(i).setTimeOnRoute(0.0d);
             }
