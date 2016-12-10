@@ -1,5 +1,8 @@
 package edu.eezo.thread;
 
+import edu.eezo.MainGUI;
+import edu.eezo.data.Order;
+import edu.eezo.data.Place;
 import edu.eezo.data.Vehicle;
 import edu.eezo.saving.LocalRoute;
 
@@ -21,6 +24,7 @@ public class AgentThread extends Thread {
 
     private AgentActual agentActual;
 
+
     public AgentThread(List<Vehicle> vehicleList, List<LocalRoute> localRoutes, JTable table, AgentActual agentActual) {
         this.tableAgentsStatus = table;
         this.agentActual = agentActual;
@@ -37,9 +41,24 @@ public class AgentThread extends Thread {
         this.isRunning = true;
     }
 
+
     @Override
     public void run() {
+        int counter = 0;
+        boolean added = false;
         while (isRunning) {
+            if (checkOrderList()) {
+                agentActual.labelNewOrders.setText("New order has been received.");
+                for (int i = 0; i < vehicleList.size(); i++) {
+                    agentActual.tableNewOrders.setValueAt(vehicleList.get(i).getIdentification(), i, 0);
+                    agentActual.tableNewOrders.setValueAt("waiting", i, 1);
+                }
+                added = true;
+            }
+//            else {
+//                agentActual.labelNewOrders.setText("No new orders.");
+//            }
+
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
@@ -59,7 +78,32 @@ public class AgentThread extends Thread {
             } catch (InterruptedException e) {
                 JOptionPane.showMessageDialog(null, "Agent Timing Error.");
             }
+
+            if (added) {
+                for (int i = 0; i < vehicleList.size(); i++) {
+                    agentActual.tableNewOrders.setValueAt(vehicleList.get(i).addMoreFreight(MainGUI.orderList.get(MainGUI.orderList.size() - 1).getFreightVolume()), i, 1);
+                    added = false;
+                }
+            }
+
+            if (counter == 6) {
+                MainGUI.orderList.add(new Order(null, false, Place.getRandomPlaceFromList(MainGUI.placeList),
+                        Place.getRandomPlaceFromList(MainGUI.placeList), 0, 0, 0));
+            }
+
+            counter++;
         }
+    }
+
+    static int size = MainGUI.orderList.size();
+
+    private static boolean checkOrderList() {
+        if (size != MainGUI.orderList.size()) {
+            size = MainGUI.orderList.size();
+            return true;
+        }
+
+        return false;
     }
 
     private void updateAgentTable(JTable table, Object[][] rows) {

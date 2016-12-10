@@ -46,6 +46,8 @@ public class MainGUI extends JFrame {
     private JButton buttonStartMAS;
     private JTable tableAgentsStatus;
     private JButton buttonStopAgents;
+    private JLabel labelNewOrderAlert;
+    private JTable tableNewOders;
 
     /**
      * Locale for date parsing.
@@ -308,7 +310,7 @@ public class MainGUI extends JFrame {
         buttonStartMAS.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                agentActual = new AgentActual(localRoutes, tableAgentsStatus);
+                agentActual = new AgentActual(localRoutes, tableAgentsStatus, tableNewOders, labelNewOrderAlert);
                 fillTableWithDataArrays(tableAgentsStatus, agentActual.getTableRowData());
 
                 tabbedPane1.setSelectedIndex(2);
@@ -323,7 +325,7 @@ public class MainGUI extends JFrame {
     }
 
     /**
-     * Sets flag for stopping time thread.
+     * Sends signals for stopping threads.
      */
     public void exitProcedure() {
         timerThread.setRunning(false);
@@ -377,6 +379,11 @@ public class MainGUI extends JFrame {
         DefaultTableModel model5 = (DefaultTableModel) tableAgentsStatus.getModel();
         model5.setColumnIdentifiers(AgentActual.getTableColumnsIdentifiers());
         model5.setRowCount(0);
+
+        // NEW ORDER TABLE INITIALIZATION
+        DefaultTableModel model6 = (DefaultTableModel) tableNewOders.getModel();
+        model6.setColumnIdentifiers(AgentActual.getTableColumnsIdentifiersForNewOrder());
+        model6.setRowCount(vehicleList.size());
 
         fillTableWithData(tableClientOrdersList, Order.getClientsOrderSublist(orderList));
         fillTableWithData(tableBasesOrderList, Order.getBaseOrderSublist(orderList));

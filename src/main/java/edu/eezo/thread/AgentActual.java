@@ -14,7 +14,15 @@ public class AgentActual implements ITableViewable {
 
     private AgentThread agentThread;
 
-    public AgentActual(List<LocalRoute> localRoutes, JTable table) {
+    JTable tableNewOrders;
+
+    JLabel labelNewOrders;
+
+
+    public AgentActual(List<LocalRoute> localRoutes, JTable table, JTable tableNewOrders, JLabel labelNewOrders) {
+        this.tableNewOrders = tableNewOrders;
+        this.labelNewOrders = labelNewOrders;
+
         agentThread = new AgentThread(MainGUI.vehicleList, localRoutes, table, this);
         agentThread.start();
     }
@@ -32,7 +40,7 @@ public class AgentActual implements ITableViewable {
      * @return an array of columns identifiers
      */
     public static String[] getTableColumnsIdentifiers() {
-        return new String[]{"Vehicle ID", "Current State", "Current Route", "Passed (km)", "Time On Route", "Current Freight"};
+        return new String[]{"Agent", "Current State", "Current Route", "Passed (km)", "Time On Route", "Current Freight"};
     }
 
 
@@ -45,5 +53,9 @@ public class AgentActual implements ITableViewable {
         }
 
         return rowData;
+    }
+
+    public static String[] getTableColumnsIdentifiersForNewOrder() {
+        return new String[]{"Agent", "Can accept"};
     }
 }
