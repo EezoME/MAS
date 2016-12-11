@@ -55,9 +55,6 @@ public class AgentThread extends Thread {
                 }
                 added = true;
             }
-//            else {
-//                agentActual.labelNewOrders.setText("No new orders.");
-//            }
 
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
@@ -97,6 +94,11 @@ public class AgentThread extends Thread {
 
     static int size = MainGUI.orderList.size();
 
+    /**
+     * Inspects if orders list size changed.
+     *
+     * @return <b>true</b> if it is, <b>false</b> - otherwise
+     */
     private static boolean checkOrderList() {
         if (size != MainGUI.orderList.size()) {
             size = MainGUI.orderList.size();
@@ -106,6 +108,12 @@ public class AgentThread extends Thread {
         return false;
     }
 
+    /**
+     * Updates specified table with specified column data.
+     *
+     * @param table specified table
+     * @param rows  specified data
+     */
     private void updateAgentTable(JTable table, Object[][] rows) {
         DefaultTableModel model = (DefaultTableModel) table.getModel();
 

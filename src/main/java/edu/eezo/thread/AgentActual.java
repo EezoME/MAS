@@ -8,6 +8,7 @@ import javax.swing.*;
 import java.util.List;
 
 /**
+ * Class for agent actual data.
  * Created by Eezo on 08.12.2016.
  */
 public class AgentActual implements ITableViewable {
@@ -55,6 +56,9 @@ public class AgentActual implements ITableViewable {
         return rowData;
     }
 
+    /**
+     * @return column identifiers for new orders table
+     */
     public static String[] getTableColumnsIdentifiersForNewOrder() {
         return new String[]{"Agent", "Can accept"};
     }

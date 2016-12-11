@@ -15,6 +15,7 @@ public class SavingTable {
 
     /**
      * Saving table column identifiers.
+     *
      * @return an array of columns identifiers
      */
     public static String[] getTableColumnsIdentifiers() {
@@ -23,7 +24,8 @@ public class SavingTable {
 
     /**
      * Sorting saving table rows with bubbles sorting algorithm.
-     * @return saving distance for sorted list
+     *
+     * @return saving distances for sorted list
      */
     public static long[] sort(List<Order> orderList) {
         if (orderList == null || orderList.isEmpty()) {
@@ -56,6 +58,12 @@ public class SavingTable {
         return distances;
     }
 
+    /**
+     * Returns an array of saving distances.
+     *
+     * @param orderList list of orders
+     * @return an array of distances
+     */
     private static long[] getSavingDistances(List<Order> orderList) {
         long[] distances = new long[orderList.size()];
 

@@ -1,0 +1,19 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="MAS:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/MAS_jar</output-path>
+    <root id="archive" name="MAS.jar">
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/src/main/resources/META-INF/MANIFEST.MF" />
+      </element>
+      <element id="module-output" name="MAS" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/joda-time/joda-time/2.4/joda-time-2.4.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/squareup/okhttp/okhttp/2.7.5/okhttp-2.7.5.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/jxbrowser-6.7.1-cross-desktop-win_mac_linux/lib/jxbrowser-win-6.7.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/jxbrowser-6.7.1-cross-desktop-win_mac_linux/lib/jxbrowser-6.7.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/jxbrowser-6.7.1-cross-desktop-win_mac_linux/license/license.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/google/maps/google-maps-services/0.1.16/google-maps-services-0.1.16.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/squareup/okio/okio/1.6.0/okio-1.6.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/google/code/gson/gson/2.3.1/gson-2.3.1.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
